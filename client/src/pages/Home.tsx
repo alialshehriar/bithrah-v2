@@ -116,7 +116,7 @@ export default function Home() {
     {
       step: "4",
       title: "حقق النجاح",
-      description: "أغلق الصفقة واحصل على التمويل اللازم لتحويل فكرتك إلى واقع",
+      description: "أغلق الصفقة واحصل على الدعم اللازم لتحويل فكرتك إلى واقع",
       icon: Trophy,
     },
   ];

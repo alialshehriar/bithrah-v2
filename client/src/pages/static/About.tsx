@@ -49,24 +49,9 @@ export default function About() {
 
   const team = [
     {
-      name: "أحمد محمد",
+      name: "علي الشهري",
       role: "المؤسس والرئيس التنفيذي",
-      description: "خبرة 15 عاماً في ريادة الأعمال والاستثمار",
-    },
-    {
-      name: "فاطمة علي",
-      role: "مديرة التقنية",
-      description: "متخصصة في تطوير المنصات الرقمية والذكاء الاصطناعي",
-    },
-    {
-      name: "خالد سعد",
-      role: "مدير العمليات",
-      description: "خبير في إدارة المشاريع وتطوير الأعمال",
-    },
-    {
-      name: "سارة أحمد",
-      role: "مديرة التسويق",
-      description: "متخصصة في التسويق الرقمي وبناء العلامات التجارية",
+      description: "رائد أعمال سعودي متحمس لدعم ريادة الأعمال في العالم العربي",
     },
   ];
 
@@ -190,15 +175,15 @@ export default function About() {
       <section className="py-20 bg-gray-50">
         <div className="container">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">فريقنا</h2>
+            <h2 className="text-4xl font-bold mb-4">المؤسس</h2>
             <p className="text-xl text-gray-600">
-              مجموعة من الخبراء المتحمسين لدعم ريادة الأعمال
+              قيادة متحمسة لدعم ريادة الأعمال
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="max-w-md mx-auto">
             {team.map((member, index) => (
-              <Card key={index} className="p-6 text-center card-hover">
+              <Card key={index} className="p-8 text-center card-hover">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 mx-auto mb-4 flex items-center justify-center">
                   <Users className="w-12 h-12 text-white" />
                 </div>

@@ -15,6 +15,7 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
+import { FaWhatsapp, FaXTwitter } from "react-icons/fa6";
 import { toast } from "sonner";
 
 export default function Contact() {
@@ -51,10 +52,11 @@ export default function Contact() {
     {
       icon: Phone,
       title: "الهاتف",
-      value: "+966 50 123 4567",
-      link: "tel:+966501234567",
+      value: "0592725341",
+      link: "tel:+966592725341",
       color: "text-green-600",
       bgColor: "bg-green-50",
+      whatsapp: "https://wa.me/966592725341",
     },
     {
       icon: MapPin,
@@ -71,6 +73,14 @@ export default function Contact() {
       link: null,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
+    },
+    {
+      icon: FaXTwitter,
+      title: "حساب X (تويتر)",
+      value: "@bithrahapp",
+      link: "https://x.com/bithrahapp",
+      color: "text-gray-900",
+      bgColor: "bg-gray-50",
     },
   ];
 
@@ -120,12 +130,25 @@ export default function Contact() {
                 </div>
                 <h3 className="font-bold mb-2">{info.title}</h3>
                 {info.link ? (
-                  <a
-                    href={info.link}
-                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    {info.value}
-                  </a>
+                  <div className="space-y-2">
+                    <a
+                      href={info.link}
+                      className="text-sm text-gray-600 hover:text-blue-600 transition-colors block"
+                    >
+                      {info.value}
+                    </a>
+                    {(info as any).whatsapp && (
+                      <a
+                        href={(info as any).whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium"
+                      >
+                        <FaWhatsapp className="w-5 h-5" />
+                        فتح واتساب
+                      </a>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-sm text-gray-600">{info.value}</p>
                 )}
