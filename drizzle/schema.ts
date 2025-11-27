@@ -1,68 +1,94 @@
 import {
   boolean,
-  datetime,
-  int,
+  timestamp,
+  integer,
+  serial,
   json,
-  mysqlEnum,
-  mysqlTable,
+  pgEnum,
+  pgTable,
   text,
-  varchar,
-  decimal,
+  numeric,
   index,
   uniqueIndex,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
+// Enum definitions
+export const backingTypeEnum = pgEnum("backingType", ["support", "negotiation_deposit"]);
+export const commissionStatusEnum = pgEnum("commissionStatus", ["pending", "approved", "paid"]);
+export const commissionTypeEnum = pgEnum("commissionType", ["bithrah_basic", "bithrah_plus", "marketer"]);
+export const depositStatusEnum = pgEnum("depositStatus", ["pending", "paid", "refunded"]);
+export const evaluationStatusEnum = pgEnum("evaluationStatus", ["pending", "processing", "completed", "failed"]);
+export const linkTypeEnum = pgEnum("linkType", ["website", "twitter", "linkedin", "instagram", "facebook", "other"]);
+export const mediaTypeEnum = pgEnum("mediaType", ["image", "video", "pdf", "document"]);
+export const messageTypeEnum = pgEnum("messageType", ["text", "file", "offer", "counter_offer"]);
+export const negotiationCommissionTypeEnum = pgEnum("negotiationCommissionType", ["basic", "plus"]);
+export const negotiationStatusEnum = pgEnum("negotiationStatus", ["open", "in_progress", "closed_success", "closed_failed", "cancelled"]);
+export const packageTypeEnum = pgEnum("packageType", ["support", "negotiation_deposit"]);
+export const paymentStatusEnum = pgEnum("paymentStatus", ["pending", "processing", "completed", "failed", "refunded"]);
+export const paymentTypeEnum = pgEnum("paymentType", ["deposit", "commission", "refund", "subscription"]);
+export const postTypeEnum = pgEnum("postType", ["text", "image", "video", "link", "poll"]);
+export const projectStatusEnum = pgEnum("projectStatus", ["draft", "under_review", "published", "funded", "suspended", "completed"]);
+export const reactionTypeEnum = pgEnum("reactionType", ["like", "love", "celebrate", "support", "insightful"]);
+export const reportReasonEnum = pgEnum("reportReason", ["spam", "harassment", "inappropriate", "misleading", "other"]);
+export const reportStatusEnum = pgEnum("reportStatus", ["pending", "reviewed", "action_taken", "dismissed"]);
+export const roleEnum = pgEnum("role", ["user", "admin"]);
+export const settingTypeEnum = pgEnum("settingType", ["text", "boolean", "number", "json"]);
+export const snapshotTypeEnum = pgEnum("snapshotType", ["daily", "weekly", "monthly", "all_time"]);
+export const subscriptionTierEnum = pgEnum("subscriptionTier", ["free", "silver", "gold", "platinum"]);
+export const transactionTypeEnum = pgEnum("transactionType", ["credit", "debit", "commission", "withdrawal"]);
+export const visibilityEnum = pgEnum("visibility", ["public", "private", "unlisted"]);
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // USERS & AUTHENTICATION
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const users = mysqlTable(
+export const users = pgTable(
   "users",
   {
-    id: int("id").autoincrement().primaryKey(),
-    openId: varchar("openId", { length: 64 }).notNull().unique(),
-    email: varchar("email", { length: 320 }),
-    username: varchar("username", { length: 100 }),
+    id: serial("id").primaryKey(),
+    openId: text("openId").notNull().unique(),
+    email: text("email"),
+    username: text("username"),
     name: text("name"),
-    passwordHash: varchar("passwordHash", { length: 255 }),
-    loginMethod: varchar("loginMethod", { length: 64 }),
+    passwordHash: text("passwordHash"),
+    loginMethod: text("loginMethod"),
 
     // Profile Information
     bio: text("bio"),
-    avatarUrl: varchar("avatarUrl", { length: 500 }),
-    coverImageUrl: varchar("coverImageUrl", { length: 500 }),
-    city: varchar("city", { length: 100 }),
-    country: varchar("country", { length: 100 }).default("Saudi Arabia"),
-    phone: varchar("phone", { length: 50 }),
+    avatarUrl: text("avatarUrl"),
+    coverImageUrl: text("coverImageUrl"),
+    city: text("city"),
+    country: text("country").default("Saudi Arabia"),
+    phone: text("phone"),
 
     // User Type & Status
-    role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+    role: roleEnum("role").default("user").notNull(),
     isVerified: boolean("isVerified").default(false).notNull(),
     isEarlyAccess: boolean("isEarlyAccess").default(false).notNull(),
-    batch: varchar("batch", { length: 50 }), // early_access, beta, public
+    batch: text("batch"), // early_access, beta, public
     isActive: boolean("isActive").default(true).notNull(),
 
     // Subscription
-    subscriptionTier: mysqlEnum("subscriptionTier", ["free", "silver", "gold", "platinum"]).default("free").notNull(),
-    subscriptionExpiresAt: datetime("subscriptionExpiresAt"),
+    subscriptionTier: subscriptionTierEnum("subscriptionTier").default("free").notNull(),
+    subscriptionExpiresAt: timestamp("subscriptionExpiresAt"),
 
     // Social Links
-    websiteUrl: varchar("websiteUrl", { length: 500 }),
-    twitterUrl: varchar("twitterUrl", { length: 500 }),
-    linkedinUrl: varchar("linkedinUrl", { length: 500 }),
-    instagramUrl: varchar("instagramUrl", { length: 500 }),
+    websiteUrl: text("websiteUrl"),
+    twitterUrl: text("twitterUrl"),
+    linkedinUrl: text("linkedinUrl"),
+    instagramUrl: text("instagramUrl"),
 
     // Settings
     emailNotifications: boolean("emailNotifications").default(true).notNull(),
     marketingEmails: boolean("marketingEmails").default(false).notNull(),
-    language: varchar("language", { length: 10 }).default("ar").notNull(),
-    timezone: varchar("timezone", { length: 50 }).default("Asia/Riyadh").notNull(),
+    language: text("language").default("ar").notNull(),
+    timezone: text("timezone").default("Asia/Riyadh").notNull(),
 
     // Timestamps
-    createdAt: datetime("createdAt").notNull(),
-    updatedAt: datetime("updatedAt").notNull(),
-    lastSignedIn: datetime("lastSignedIn").notNull(),
-    deletedAt: datetime("deletedAt"),
+    createdAt: timestamp("createdAt").notNull(),
+    updatedAt: timestamp("updatedAt").notNull(),
+    lastSignedIn: timestamp("lastSignedIn").notNull(),
+    deletedAt: timestamp("deletedAt"),
   },
   (table) => ({
     emailIdx: index("email_idx").on(table.email),
@@ -70,45 +96,45 @@ export const users = mysqlTable(
   })
 );
 
-export const emailVerificationTokens = mysqlTable("emailVerificationTokens", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  expiresAt: datetime("expiresAt").notNull(),
-  createdAt: datetime("createdAt").notNull(),
-  usedAt: datetime("usedAt"),
+export const emailVerificationTokens = pgTable("emailVerificationTokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  usedAt: timestamp("usedAt"),
 });
 
-export const passwordResetTokens = mysqlTable("passwordResetTokens", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  expiresAt: datetime("expiresAt").notNull(),
-  createdAt: datetime("createdAt").notNull(),
-  usedAt: datetime("usedAt"),
+export const passwordResetTokens = pgTable("passwordResetTokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  usedAt: timestamp("usedAt"),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // IDEAS & EVALUATION
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const ideas = mysqlTable(
+export const ideas = pgTable(
   "ideas",
   {
-    id: int("id").autoincrement().primaryKey(),
-    userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
     // Idea Information
-    ideaName: varchar("ideaName", { length: 255 }).notNull(),
+    ideaName: text("ideaName").notNull(),
     ideaDescription: text("ideaDescription").notNull(),
-    sector: varchar("sector", { length: 100 }),
-    category: varchar("category", { length: 100 }),
-    stage: varchar("stage", { length: 100 }),
+    sector: text("sector"),
+    category: text("category"),
+    stage: text("stage"),
     technicalNeeds: text("technicalNeeds"),
     financialNeeds: text("financialNeeds"),
 
     // AI Evaluation Results
-    evaluationStatus: mysqlEnum("evaluationStatus", ["pending", "processing", "completed", "failed"]).default("pending").notNull(),
+    evaluationStatus: evaluationStatusEnum("evaluationStatus").default("pending").notNull(),
     evaluationSummary: text("evaluationSummary"),
     strengths: text("strengths"),
     weaknesses: text("weaknesses"),
@@ -119,20 +145,20 @@ export const ideas = mysqlTable(
     marketAnalysis: text("marketAnalysis"),
     executionAnalysis: text("executionAnalysis"),
     growthStrategy: text("growthStrategy"),
-    overallScore: decimal("overallScore", { precision: 3, scale: 2 }),
+    overallScore: numeric("overallScore", { precision: 3, scale: 2 }),
 
     // Conversion to Project
     convertedToProject: boolean("convertedToProject").default(false).notNull(),
-    projectId: int("projectId"),
+    projectId: integer("projectId"),
 
     // Demo Flag
     isDemo: boolean("isDemo").default(false).notNull(),
 
     // Timestamps
-    createdAt: datetime("createdAt").notNull(),
-    updatedAt: datetime("updatedAt").notNull(),
-    evaluatedAt: datetime("evaluatedAt"),
-    deletedAt: datetime("deletedAt"),
+    createdAt: timestamp("createdAt").notNull(),
+    updatedAt: timestamp("updatedAt").notNull(),
+    evaluatedAt: timestamp("evaluatedAt"),
+    deletedAt: timestamp("deletedAt"),
   },
   (table) => ({
     userIdIdx: index("ideas_user_id_idx").on(table.userId),
@@ -145,52 +171,52 @@ export const ideas = mysqlTable(
 // PROJECTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const projects = mysqlTable(
+export const projects = pgTable(
   "projects",
   {
-    id: int("id").autoincrement().primaryKey(),
-    userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-    ideaId: int("ideaId").references(() => ideas.id, { onDelete: "set null" }),
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    ideaId: integer("ideaId").references(() => ideas.id, { onDelete: "set null" }),
 
     // Basic Information
-    projectName: varchar("projectName", { length: 255 }).notNull(),
-    slug: varchar("slug", { length: 255 }).notNull().unique(),
-    tagline: varchar("tagline", { length: 500 }),
+    projectName: text("projectName").notNull(),
+    slug: text("slug").notNull().unique(),
+    tagline: text("tagline"),
     description: text("description").notNull(),
-    sector: varchar("sector", { length: 100 }),
-    category: varchar("category", { length: 100 }),
+    sector: text("sector"),
+    category: text("category"),
 
     // Location
-    city: varchar("city", { length: 100 }),
-    country: varchar("country", { length: 100 }).default("Saudi Arabia"),
+    city: text("city"),
+    country: text("country").default("Saudi Arabia"),
 
     // Financial Goals
-    fundingGoal: decimal("fundingGoal", { precision: 15, scale: 2 }).notNull(),
-    currentFunding: decimal("currentFunding", { precision: 15, scale: 2 }).default("0.00").notNull(),
-    currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
-    deadline: datetime("deadline"),
+    fundingGoal: numeric("fundingGoal", { precision: 15, scale: 2 }).notNull(),
+    currentFunding: numeric("currentFunding", { precision: 15, scale: 2 }).default("0.00").notNull(),
+    currency: text("currency").default("SAR").notNull(),
+    deadline: timestamp("deadline"),
 
     // Media
-    coverImageUrl: varchar("coverImageUrl", { length: 500 }),
-    videoUrl: varchar("videoUrl", { length: 500 }),
+    coverImageUrl: text("coverImageUrl"),
+    videoUrl: text("videoUrl"),
 
     // Required Sections
     risksDescription: text("risksDescription"),
     fundUsageDescription: text("fundUsageDescription"),
 
     // Status & Workflow
-    status: mysqlEnum("status", ["draft", "under_review", "published", "funded", "suspended", "completed"]).default("draft").notNull(),
-    visibility: mysqlEnum("visibility", ["public", "private", "unlisted"]).default("public").notNull(),
+    status: projectStatusEnum("projectStatus").default("draft").notNull(),
+    visibility: visibilityEnum("visibility").default("public").notNull(),
 
     // Demo Flag
     isDemo: boolean("isDemo").default(false).notNull(),
 
     // Timestamps
-    createdAt: datetime("createdAt").notNull(),
-    updatedAt: datetime("updatedAt").notNull(),
-    publishedAt: datetime("publishedAt"),
-    fundedAt: datetime("fundedAt"),
-    deletedAt: datetime("deletedAt"),
+    createdAt: timestamp("createdAt").notNull(),
+    updatedAt: timestamp("updatedAt").notNull(),
+    publishedAt: timestamp("publishedAt"),
+    fundedAt: timestamp("fundedAt"),
+    deletedAt: timestamp("deletedAt"),
   },
   (table) => ({
     userIdIdx: index("projects_user_id_idx").on(table.userId),
@@ -200,336 +226,336 @@ export const projects = mysqlTable(
   })
 );
 
-export const projectTeamMembers = mysqlTable("projectTeamMembers", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  memberName: varchar("memberName", { length: 255 }).notNull(),
-  memberRole: varchar("memberRole", { length: 255 }).notNull(),
+export const projectTeamMembers = pgTable("projectTeamMembers", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  memberName: text("memberName").notNull(),
+  memberRole: text("memberRole").notNull(),
   memberBio: text("memberBio"),
-  memberImageUrl: varchar("memberImageUrl", { length: 500 }),
-  displayOrder: int("displayOrder").default(0).notNull(),
-  createdAt: datetime("createdAt").notNull(),
+  memberImageUrl: text("memberImageUrl"),
+  displayOrder: integer("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const projectMedia = mysqlTable("projectMedia", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  mediaType: mysqlEnum("mediaType", ["image", "video", "pdf", "document"]).notNull(),
-  mediaUrl: varchar("mediaUrl", { length: 500 }).notNull(),
-  mediaTitle: varchar("mediaTitle", { length: 255 }),
+export const projectMedia = pgTable("projectMedia", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  mediaType: mediaTypeEnum("mediaType").notNull(),
+  mediaUrl: text("mediaUrl").notNull(),
+  mediaTitle: text("mediaTitle"),
   mediaDescription: text("mediaDescription"),
-  fileSize: int("fileSize"),
-  mimeType: varchar("mimeType", { length: 100 }),
-  displayOrder: int("displayOrder").default(0).notNull(),
-  createdAt: datetime("createdAt").notNull(),
+  fileSize: integer("fileSize"),
+  mimeType: text("mimeType"),
+  displayOrder: integer("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const projectLinks = mysqlTable("projectLinks", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  linkType: mysqlEnum("linkType", ["website", "twitter", "linkedin", "instagram", "facebook", "other"]).notNull(),
-  linkUrl: varchar("linkUrl", { length: 500 }).notNull(),
-  linkTitle: varchar("linkTitle", { length: 255 }),
-  createdAt: datetime("createdAt").notNull(),
+export const projectLinks = pgTable("projectLinks", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  linkType: linkTypeEnum("linkType").notNull(),
+  linkUrl: text("linkUrl").notNull(),
+  linkTitle: text("linkTitle"),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const projectUpdates = mysqlTable("projectUpdates", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  updateTitle: varchar("updateTitle", { length: 255 }).notNull(),
+export const projectUpdates = pgTable("projectUpdates", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  updateTitle: text("updateTitle").notNull(),
   updateContent: text("updateContent").notNull(),
   isPublic: boolean("isPublic").default(true).notNull(),
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const projectComments = mysqlTable("projectComments", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  parentCommentId: int("parentCommentId"),
+export const projectComments = pgTable("projectComments", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  parentCommentId: integer("parentCommentId"),
   commentText: text("commentText").notNull(),
   isDeleted: boolean("isDeleted").default(false).notNull(),
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PROJECT PACKAGES (REWARDS/TIERS)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const projectPackages = mysqlTable("projectPackages", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+export const projectPackages = pgTable("projectPackages", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
 
   // Package Information
-  packageName: varchar("packageName", { length: 255 }).notNull(),
-  packageType: mysqlEnum("packageType", ["support", "negotiation_deposit"]).default("support").notNull(),
-  packageAmount: decimal("packageAmount", { precision: 15, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
+  packageName: text("packageName").notNull(),
+  packageType: packageTypeEnum("packageType").default("support").notNull(),
+  packageAmount: numeric("packageAmount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("SAR").notNull(),
   packageDescription: text("packageDescription"),
 
   // Limits
   isLimited: boolean("isLimited").default(false).notNull(),
-  totalQuantity: int("totalQuantity"),
-  claimedQuantity: int("claimedQuantity").default(0).notNull(),
+  totalQuantity: integer("totalQuantity"),
+  claimedQuantity: integer("claimedQuantity").default(0).notNull(),
 
   // Features/Benefits
   features: json("features").$type<string[]>(),
 
   // Display
-  displayOrder: int("displayOrder").default(0).notNull(),
+  displayOrder: integer("displayOrder").default(0).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SUPPORT & BACKING
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const projectBackings = mysqlTable("projectBackings", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  packageId: int("packageId").references(() => projectPackages.id, { onDelete: "set null" }),
+export const projectBackings = pgTable("projectBackings", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  packageId: integer("packageId").references(() => projectPackages.id, { onDelete: "set null" }),
 
   // Backing Details
-  backingAmount: decimal("backingAmount", { precision: 15, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
-  backingType: mysqlEnum("backingType", ["support", "negotiation_deposit"]).default("support").notNull(),
+  backingAmount: numeric("backingAmount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("SAR").notNull(),
+  backingType: backingTypeEnum("backingType").default("support").notNull(),
 
   // Payment Status
-  paymentStatus: mysqlEnum("paymentStatus", ["pending", "processing", "completed", "failed", "refunded"]).default("pending").notNull(),
-  paymentMethod: varchar("paymentMethod", { length: 50 }),
-  paymentReference: varchar("paymentReference", { length: 255 }),
+  paymentStatus: paymentStatusEnum("paymentStatus").default("pending").notNull(),
+  paymentMethod: text("paymentMethod"),
+  paymentReference: text("paymentReference"),
 
   // Referral
-  referralCode: varchar("referralCode", { length: 100 }),
-  referredByUserId: int("referredByUserId").references(() => users.id, { onDelete: "set null" }),
+  referralCode: text("referralCode"),
+  referredByUserId: integer("referredByUserId").references(() => users.id, { onDelete: "set null" }),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  completedAt: datetime("completedAt"),
-  refundedAt: datetime("refundedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  completedAt: timestamp("completedAt"),
+  refundedAt: timestamp("refundedAt"),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // NEGOTIATIONS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const negotiations = mysqlTable("negotiations", {
-  id: int("id").autoincrement().primaryKey(),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  investorId: int("investorId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  projectOwnerId: int("projectOwnerId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const negotiations = pgTable("negotiations", {
+  id: serial("id").primaryKey(),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  investorId: integer("investorId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectOwnerId: integer("projectOwnerId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Negotiation Details
-  depositAmount: decimal("depositAmount", { precision: 15, scale: 2 }),
-  depositStatus: mysqlEnum("depositStatus", ["pending", "paid", "refunded"]).default("pending").notNull(),
+  depositAmount: numeric("depositAmount", { precision: 15, scale: 2 }),
+  depositStatus: depositStatusEnum("depositStatus").default("pending").notNull(),
 
   // Status
-  status: mysqlEnum("status", ["open", "in_progress", "closed_success", "closed_failed", "cancelled"]).default("open").notNull(),
+  status: negotiationStatusEnum("negotiationStatus").default("open").notNull(),
 
   // Deal Details (if closed successfully)
-  dealAmount: decimal("dealAmount", { precision: 15, scale: 2 }),
+  dealAmount: numeric("dealAmount", { precision: 15, scale: 2 }),
   dealTerms: text("dealTerms"),
-  commissionType: mysqlEnum("commissionType", ["basic", "plus"]),
-  bithrahCommission: decimal("bithrahCommission", { precision: 15, scale: 2 }),
-  marketerCommission: decimal("marketerCommission", { precision: 15, scale: 2 }),
+  commissionType: negotiationCommissionTypeEnum("negotiationCommissionType"),
+  bithrahCommission: numeric("bithrahCommission", { precision: 15, scale: 2 }),
+  marketerCommission: numeric("marketerCommission", { precision: 15, scale: 2 }),
 
   // NDA
   ndaSigned: boolean("ndaSigned").default(false).notNull(),
-  ndaSignedAt: datetime("ndaSignedAt"),
+  ndaSignedAt: timestamp("ndaSignedAt"),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
-  closedAt: datetime("closedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
+  closedAt: timestamp("closedAt"),
 });
 
-export const negotiationMessages = mysqlTable("negotiationMessages", {
-  id: int("id").autoincrement().primaryKey(),
-  negotiationId: int("negotiationId").notNull().references(() => negotiations.id, { onDelete: "cascade" }),
-  senderId: int("senderId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const negotiationMessages = pgTable("negotiationMessages", {
+  id: serial("id").primaryKey(),
+  negotiationId: integer("negotiationId").notNull().references(() => negotiations.id, { onDelete: "cascade" }),
+  senderId: integer("senderId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Message Content
   messageText: text("messageText").notNull(),
-  messageType: mysqlEnum("messageType", ["text", "file", "offer", "counter_offer"]).default("text").notNull(),
+  messageType: messageTypeEnum("messageType").default("text").notNull(),
 
   // Attachments
-  attachmentUrl: varchar("attachmentUrl", { length: 500 }),
-  attachmentType: varchar("attachmentType", { length: 50 }),
+  attachmentUrl: text("attachmentUrl"),
+  attachmentType: text("attachmentType"),
 
   // Status
   isRead: boolean("isRead").default(false).notNull(),
-  readAt: datetime("readAt"),
+  readAt: timestamp("readAt"),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // REFERRALS & COMMISSIONS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const referrals = mysqlTable("referrals", {
-  id: int("id").autoincrement().primaryKey(),
-  referrerUserId: int("referrerUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  referrerUserId: integer("referrerUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
 
   // Referral Code
-  referralCode: varchar("referralCode", { length: 100 }).notNull().unique(),
+  referralCode: text("referralCode").notNull().unique(),
 
   // Tracking
-  clicksCount: int("clicksCount").default(0).notNull(),
-  conversionsCount: int("conversionsCount").default(0).notNull(),
-  totalCommission: decimal("totalCommission", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  clicksCount: integer("clicksCount").default(0).notNull(),
+  conversionsCount: integer("conversionsCount").default(0).notNull(),
+  totalCommission: numeric("totalCommission", { precision: 15, scale: 2 }).default("0.00").notNull(),
 
   // Status
   isActive: boolean("isActive").default(true).notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const referralClicks = mysqlTable("referralClicks", {
-  id: int("id").autoincrement().primaryKey(),
-  referralId: int("referralId").notNull().references(() => referrals.id, { onDelete: "cascade" }),
-  ipAddress: varchar("ipAddress", { length: 50 }),
+export const referralClicks = pgTable("referralClicks", {
+  id: serial("id").primaryKey(),
+  referralId: integer("referralId").notNull().references(() => referrals.id, { onDelete: "cascade" }),
+  ipAddress: text("ipAddress"),
   userAgent: text("userAgent"),
-  clickedAt: datetime("clickedAt").notNull(),
+  clickedAt: timestamp("clickedAt").notNull(),
 });
 
-export const commissions = mysqlTable("commissions", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  negotiationId: int("negotiationId").references(() => negotiations.id, { onDelete: "set null" }),
-  referralId: int("referralId").references(() => referrals.id, { onDelete: "set null" }),
+export const commissions = pgTable("commissions", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  negotiationId: integer("negotiationId").references(() => negotiations.id, { onDelete: "set null" }),
+  referralId: integer("referralId").references(() => referrals.id, { onDelete: "set null" }),
 
   // Commission Details
-  commissionType: mysqlEnum("commissionType", ["bithrah_basic", "bithrah_plus", "marketer"]).notNull(),
-  commissionAmount: decimal("commissionAmount", { precision: 15, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
+  commissionType: commissionTypeEnum("commissionType").notNull(),
+  commissionAmount: numeric("commissionAmount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("SAR").notNull(),
 
   // Deal Reference
-  dealAmount: decimal("dealAmount", { precision: 15, scale: 2 }),
-  commissionPercentage: decimal("commissionPercentage", { precision: 5, scale: 2 }),
+  dealAmount: numeric("dealAmount", { precision: 15, scale: 2 }),
+  commissionPercentage: numeric("commissionPercentage", { precision: 5, scale: 2 }),
 
   // Status
-  status: mysqlEnum("status", ["pending", "approved", "paid"]).default("pending").notNull(),
+  status: commissionStatusEnum("commissionStatus").default("pending").notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  approvedAt: datetime("approvedAt"),
-  paidAt: datetime("paidAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  approvedAt: timestamp("approvedAt"),
+  paidAt: timestamp("paidAt"),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PAYMENTS & WALLET
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const payments = mysqlTable("payments", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Payment Details
-  paymentType: mysqlEnum("paymentType", ["deposit", "commission", "refund", "subscription"]).notNull(),
-  paymentAmount: decimal("paymentAmount", { precision: 15, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
+  paymentType: paymentTypeEnum("paymentType").notNull(),
+  paymentAmount: numeric("paymentAmount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("SAR").notNull(),
 
   // Payment Gateway
-  paymentMethod: varchar("paymentMethod", { length: 50 }),
-  paymentGateway: varchar("paymentGateway", { length: 50 }),
-  gatewayTransactionId: varchar("gatewayTransactionId", { length: 255 }),
+  paymentMethod: text("paymentMethod"),
+  paymentGateway: text("paymentGateway"),
+  gatewayTransactionId: text("gatewayTransactionId"),
   gatewayResponse: text("gatewayResponse"),
 
   // Related Entities
-  projectId: int("projectId").references(() => projects.id, { onDelete: "set null" }),
-  negotiationId: int("negotiationId").references(() => negotiations.id, { onDelete: "set null" }),
-  backingId: int("backingId").references(() => projectBackings.id, { onDelete: "set null" }),
+  projectId: integer("projectId").references(() => projects.id, { onDelete: "set null" }),
+  negotiationId: integer("negotiationId").references(() => negotiations.id, { onDelete: "set null" }),
+  backingId: integer("backingId").references(() => projectBackings.id, { onDelete: "set null" }),
 
   // Status
-  status: mysqlEnum("status", ["pending", "processing", "completed", "failed", "refunded"]).default("pending").notNull(),
+  status: paymentStatusEnum("paymentStatus").default("pending").notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  completedAt: datetime("completedAt"),
-  failedAt: datetime("failedAt"),
-  refundedAt: datetime("refundedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  completedAt: timestamp("completedAt"),
+  failedAt: timestamp("failedAt"),
+  refundedAt: timestamp("refundedAt"),
 });
 
-export const userWallets = mysqlTable("userWallets", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+export const userWallets = pgTable("userWallets", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
 
   // Balance
-  availableBalance: decimal("availableBalance", { precision: 15, scale: 2 }).default("0.00").notNull(),
-  pendingBalance: decimal("pendingBalance", { precision: 15, scale: 2 }).default("0.00").notNull(),
-  totalEarned: decimal("totalEarned", { precision: 15, scale: 2 }).default("0.00").notNull(),
-  totalWithdrawn: decimal("totalWithdrawn", { precision: 15, scale: 2 }).default("0.00").notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
+  availableBalance: numeric("availableBalance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  pendingBalance: numeric("pendingBalance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  totalEarned: numeric("totalEarned", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  totalWithdrawn: numeric("totalWithdrawn", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  currency: text("currency").default("SAR").notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const walletTransactions = mysqlTable("walletTransactions", {
-  id: int("id").autoincrement().primaryKey(),
-  walletId: int("walletId").notNull().references(() => userWallets.id, { onDelete: "cascade" }),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const walletTransactions = pgTable("walletTransactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("walletId").notNull().references(() => userWallets.id, { onDelete: "cascade" }),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Transaction Details
-  transactionType: mysqlEnum("transactionType", ["credit", "debit", "commission", "withdrawal"]).notNull(),
-  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 10 }).default("SAR").notNull(),
+  transactionType: transactionTypeEnum("transactionType").notNull(),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("SAR").notNull(),
   description: text("description"),
 
   // Related Entities
-  commissionId: int("commissionId").references(() => commissions.id, { onDelete: "set null" }),
-  paymentId: int("paymentId").references(() => payments.id, { onDelete: "set null" }),
+  commissionId: integer("commissionId").references(() => commissions.id, { onDelete: "set null" }),
+  paymentId: integer("paymentId").references(() => payments.id, { onDelete: "set null" }),
 
   // Balance After Transaction
-  balanceAfter: decimal("balanceAfter", { precision: 15, scale: 2 }),
+  balanceAfter: numeric("balanceAfter", { precision: 15, scale: 2 }),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMMUNITY
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const communityPosts = mysqlTable(
+export const communityPosts = pgTable(
   "communityPosts",
   {
-    id: int("id").autoincrement().primaryKey(),
-    userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
     // Post Content
     postText: text("postText"),
-    postType: mysqlEnum("postType", ["text", "image", "video", "link", "poll"]).default("text").notNull(),
+    postType: postTypeEnum("postType").default("text").notNull(),
 
     // Media
-    mediaUrl: varchar("mediaUrl", { length: 500 }),
-    mediaType: varchar("mediaType", { length: 50 }),
-    linkUrl: varchar("linkUrl", { length: 500 }),
-    linkTitle: varchar("linkTitle", { length: 255 }),
+    mediaUrl: text("mediaUrl"),
+    mediaType: text("mediaType"),
+    linkUrl: text("linkUrl"),
+    linkTitle: text("linkTitle"),
     linkDescription: text("linkDescription"),
-    linkImageUrl: varchar("linkImageUrl", { length: 500 }),
+    linkImageUrl: text("linkImageUrl"),
 
     // Engagement
-    likesCount: int("likesCount").default(0).notNull(),
-    commentsCount: int("commentsCount").default(0).notNull(),
-    sharesCount: int("sharesCount").default(0).notNull(),
-    viewsCount: int("viewsCount").default(0).notNull(),
+    likesCount: integer("likesCount").default(0).notNull(),
+    commentsCount: integer("commentsCount").default(0).notNull(),
+    sharesCount: integer("sharesCount").default(0).notNull(),
+    viewsCount: integer("viewsCount").default(0).notNull(),
 
     // Hashtags & Mentions
     hashtags: json("hashtags").$type<string[]>(),
@@ -544,9 +570,9 @@ export const communityPosts = mysqlTable(
     isDemo: boolean("isDemo").default(false).notNull(),
 
     // Timestamps
-    createdAt: datetime("createdAt").notNull(),
-    updatedAt: datetime("updatedAt").notNull(),
-    deletedAt: datetime("deletedAt"),
+    createdAt: timestamp("createdAt").notNull(),
+    updatedAt: timestamp("updatedAt").notNull(),
+    deletedAt: timestamp("deletedAt"),
   },
   (table) => ({
     userIdIdx: index("community_posts_user_id_idx").on(table.userId),
@@ -554,17 +580,17 @@ export const communityPosts = mysqlTable(
   })
 );
 
-export const communityComments = mysqlTable("communityComments", {
-  id: int("id").autoincrement().primaryKey(),
-  postId: int("postId").notNull().references(() => communityPosts.id, { onDelete: "cascade" }),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  parentCommentId: int("parentCommentId"),
+export const communityComments = pgTable("communityComments", {
+  id: serial("id").primaryKey(),
+  postId: integer("postId").notNull().references(() => communityPosts.id, { onDelete: "cascade" }),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  parentCommentId: integer("parentCommentId"),
 
   // Comment Content
   commentText: text("commentText").notNull(),
 
   // Engagement
-  likesCount: int("likesCount").default(0).notNull(),
+  likesCount: integer("likesCount").default(0).notNull(),
 
   // Moderation
   isReported: boolean("isReported").default(false).notNull(),
@@ -572,63 +598,63 @@ export const communityComments = mysqlTable("communityComments", {
   isDeleted: boolean("isDeleted").default(false).notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
-  deletedAt: datetime("deletedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
+  deletedAt: timestamp("deletedAt"),
 });
 
-export const communityReactions = mysqlTable("communityReactions", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const communityReactions = pgTable("communityReactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Target (Post or Comment)
-  postId: int("postId").references(() => communityPosts.id, { onDelete: "cascade" }),
-  commentId: int("commentId").references(() => communityComments.id, { onDelete: "cascade" }),
+  postId: integer("postId").references(() => communityPosts.id, { onDelete: "cascade" }),
+  commentId: integer("commentId").references(() => communityComments.id, { onDelete: "cascade" }),
 
   // Reaction Type
-  reactionType: mysqlEnum("reactionType", ["like", "love", "celebrate", "support", "insightful"]).default("like").notNull(),
+  reactionType: reactionTypeEnum("reactionType").default("like").notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const follows = mysqlTable("follows", {
-  id: int("id").autoincrement().primaryKey(),
-  followerId: int("followerId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  followingId: int("followingId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  createdAt: datetime("createdAt").notNull(),
+export const follows = pgTable("follows", {
+  id: serial("id").primaryKey(),
+  followerId: integer("followerId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  followingId: integer("followingId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const contentReports = mysqlTable("contentReports", {
-  id: int("id").autoincrement().primaryKey(),
-  reporterId: int("reporterId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const contentReports = pgTable("contentReports", {
+  id: serial("id").primaryKey(),
+  reporterId: integer("reporterId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Reported Content
-  postId: int("postId").references(() => communityPosts.id, { onDelete: "cascade" }),
-  commentId: int("commentId").references(() => communityComments.id, { onDelete: "cascade" }),
+  postId: integer("postId").references(() => communityPosts.id, { onDelete: "cascade" }),
+  commentId: integer("commentId").references(() => communityComments.id, { onDelete: "cascade" }),
 
   // Report Details
-  reportReason: mysqlEnum("reportReason", ["spam", "harassment", "inappropriate", "misleading", "other"]).notNull(),
+  reportReason: reportReasonEnum("reportReason").notNull(),
   reportDescription: text("reportDescription"),
 
   // Status
-  status: mysqlEnum("status", ["pending", "reviewed", "action_taken", "dismissed"]).default("pending").notNull(),
-  reviewedByAdminId: int("reviewedByAdminId").references(() => users.id, { onDelete: "set null" }),
+  status: reportStatusEnum("reportStatus").default("pending").notNull(),
+  reviewedByAdminId: integer("reviewedByAdminId").references(() => users.id, { onDelete: "set null" }),
   adminNotes: text("adminNotes"),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  reviewedAt: datetime("reviewedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  reviewedAt: timestamp("reviewedAt"),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LEADERBOARD & ACHIEVEMENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const leaderboardSnapshots = mysqlTable("leaderboardSnapshots", {
-  id: int("id").autoincrement().primaryKey(),
-  snapshotDate: datetime("snapshotDate").notNull(),
-  snapshotType: mysqlEnum("snapshotType", ["daily", "weekly", "monthly", "all_time"]).notNull(),
+export const leaderboardSnapshots = pgTable("leaderboardSnapshots", {
+  id: serial("id").primaryKey(),
+  snapshotDate: timestamp("snapshotDate").notNull(),
+  snapshotType: snapshotTypeEnum("snapshotType").notNull(),
 
   // Top Projects
   topProjectsByFunding: json("topProjectsByFunding"),
@@ -640,124 +666,124 @@ export const leaderboardSnapshots = mysqlTable("leaderboardSnapshots", {
   topCommunityMembers: json("topCommunityMembers"),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
-export const userAchievements = mysqlTable("userAchievements", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const userAchievements = pgTable("userAchievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Achievement Details
-  achievementType: varchar("achievementType", { length: 100 }).notNull(),
-  achievementName: varchar("achievementName", { length: 255 }).notNull(),
+  achievementType: text("achievementType").notNull(),
+  achievementName: text("achievementName").notNull(),
   achievementDescription: text("achievementDescription"),
-  achievementIconUrl: varchar("achievementIconUrl", { length: 500 }),
+  achievementIconUrl: text("achievementIconUrl"),
 
   // Progress
-  currentProgress: int("currentProgress").default(0).notNull(),
-  targetProgress: int("targetProgress"),
+  currentProgress: integer("currentProgress").default(0).notNull(),
+  targetProgress: integer("targetProgress"),
   isCompleted: boolean("isCompleted").default(false).notNull(),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
-  completedAt: datetime("completedAt"),
+  createdAt: timestamp("createdAt").notNull(),
+  completedAt: timestamp("completedAt"),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ADMIN & ROLES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const roles = mysqlTable("roles", {
-  id: int("id").autoincrement().primaryKey(),
-  roleName: varchar("roleName", { length: 100 }).notNull().unique(),
+export const roles = pgTable("roles", {
+  id: serial("id").primaryKey(),
+  roleName: text("roleName").notNull().unique(),
   roleDescription: text("roleDescription"),
   permissions: json("permissions"),
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const userRoles = mysqlTable("userRoles", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  roleId: int("roleId").notNull().references(() => roles.id, { onDelete: "cascade" }),
-  assignedAt: datetime("assignedAt").notNull(),
-  assignedByUserId: int("assignedByUserId").references(() => users.id, { onDelete: "set null" }),
+export const userRoles = pgTable("userRoles", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  roleId: integer("roleId").notNull().references(() => roles.id, { onDelete: "cascade" }),
+  assignedAt: timestamp("assignedAt").notNull(),
+  assignedByUserId: integer("assignedByUserId").references(() => users.id, { onDelete: "set null" }),
 });
 
-export const adminActivityLogs = mysqlTable("adminActivityLogs", {
-  id: int("id").autoincrement().primaryKey(),
-  adminUserId: int("adminUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const adminActivityLogs = pgTable("adminActivityLogs", {
+  id: serial("id").primaryKey(),
+  adminUserId: integer("adminUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
   // Activity Details
-  actionType: varchar("actionType", { length: 100 }).notNull(),
+  actionType: text("actionType").notNull(),
   actionDescription: text("actionDescription"),
 
   // Target Entity
-  targetType: varchar("targetType", { length: 50 }),
-  targetId: int("targetId"),
+  targetType: text("targetType"),
+  targetId: integer("targetId"),
 
   // Changes
   changesMade: json("changesMade"),
 
   // Timestamps
-  createdAt: datetime("createdAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STATIC CONTENT & SETTINGS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const staticPages = mysqlTable("staticPages", {
-  id: int("id").autoincrement().primaryKey(),
-  pageSlug: varchar("pageSlug", { length: 100 }).notNull().unique(),
-  pageTitle: varchar("pageTitle", { length: 255 }).notNull(),
+export const staticPages = pgTable("staticPages", {
+  id: serial("id").primaryKey(),
+  pageSlug: text("pageSlug").notNull().unique(),
+  pageTitle: text("pageTitle").notNull(),
   pageContent: text("pageContent").notNull(),
-  metaTitle: varchar("metaTitle", { length: 255 }),
+  metaTitle: text("metaTitle"),
   metaDescription: text("metaDescription"),
   isPublished: boolean("isPublished").default(true).notNull(),
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const siteSettings = mysqlTable("siteSettings", {
-  id: int("id").autoincrement().primaryKey(),
-  settingKey: varchar("settingKey", { length: 100 }).notNull().unique(),
+export const siteSettings = pgTable("siteSettings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("settingKey").notNull().unique(),
   settingValue: text("settingValue"),
-  settingType: mysqlEnum("settingType", ["text", "boolean", "number", "json"]).default("text").notNull(),
+  settingType: settingTypeEnum("settingType").default("text").notNull(),
   settingDescription: text("settingDescription"),
-  createdAt: datetime("createdAt").notNull(),
-  updatedAt: datetime("updatedAt").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // NOTIFICATIONS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const notifications = mysqlTable(
+export const notifications = pgTable(
   "notifications",
   {
-    id: int("id").autoincrement().primaryKey(),
-    userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    id: serial("id").primaryKey(),
+    userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
 
     // Notification Details
-    notificationType: varchar("notificationType", { length: 100 }).notNull(),
-    notificationTitle: varchar("notificationTitle", { length: 255 }).notNull(),
+    notificationType: text("notificationType").notNull(),
+    notificationTitle: text("notificationTitle").notNull(),
     notificationText: text("notificationText"),
-    notificationIconUrl: varchar("notificationIconUrl", { length: 500 }),
+    notificationIconUrl: text("notificationIconUrl"),
 
     // Related Entity
-    relatedEntityType: varchar("relatedEntityType", { length: 50 }),
-    relatedEntityId: int("relatedEntityId"),
+    relatedEntityType: text("relatedEntityType"),
+    relatedEntityId: integer("relatedEntityId"),
 
     // Action URL
-    actionUrl: varchar("actionUrl", { length: 500 }),
+    actionUrl: text("actionUrl"),
 
     // Status
     isRead: boolean("isRead").default(false).notNull(),
-    readAt: datetime("readAt"),
+    readAt: timestamp("readAt"),
 
     // Timestamps
-    createdAt: datetime("createdAt").notNull(),
+    createdAt: timestamp("createdAt").notNull(),
   },
   (table) => ({
     userIdIdx: index("notifications_user_id_idx").on(table.userId),

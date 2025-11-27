@@ -381,3 +381,49 @@
   - [x] قسم الإنجازات المتاحة
   - [x] Trend indicators (صعود، هبوط، ثابت)
   - [x] إضافة route في App.tsx
+
+
+## 🔄 Migration إلى Neon PostgreSQL (جاري التنفيذ)
+
+### Phase 1: Update database schema and configuration for PostgreSQL
+- [x] تحديث drizzle.config.ts → dialect: "postgresql"
+- [x] تحويل schema.ts من MySQL إلى PostgreSQL (33 جدول)
+- [x] تعريف 20 enum بشكل صحيح (pgEnum)
+- [x] تحويل جميع أنواع البيانات (int→integer, datetime→timestamp, varchar→text, decimal→numeric)
+- [x] تحديث autoincrement → serial
+- [x] تثبيت @neondatabase/serverless driver
+- [x] إنشاء migration file جديد
+
+### Phase 2: Update server code and routers for PostgreSQL compatibility
+- [x] تحديث server/db.ts → استخدام Neon HTTP driver
+- [x] مراجعة وتحديث جميع الـ queries في server/routers.ts
+- [x] إصلاح أخطاء TypeScript (0 أخطاء الآن!)
+- [x] التأكد من توافق جميع database helpers
+- [x] استبدال onDuplicateKeyUpdate بـ onConflictDoUpdate
+- [x] استبدال insertId بـ .returning()
+
+### Phase 3: Apply migrations to Neon database and verify connection
+- [x] تطبيق migrations على Neon database
+- [x] التحقق من إنشاء جميع الجداول بنجاح (33 جدول + 24 enum)
+- [x] اختبار الاتصال بقاعدة البيانات
+- [ ] كتابة vitest test للتحقق من DATABASE_U### Phase 4: Seed initial data and test all database operations
+- [x] إنشاء seed script لبيانات أولية
+- [x] إضافة مشروع demo واحد
+- [x] إضافة مستخدم demo
+- [x] إضافة idea + package + community post + wallet
+- [x] اختبار جميع database operationsحدة
+- [ ] اختبار جميع CRUD operations
+### Phase 5: Test complete user journey and fix any issues
+- [x] اختبار الصفحة الرئيسية - تعمل بنجاح
+- [x] اختبار Modal الترحيبي - يظهر بشكل صحيح
+- [x] اختبار Navigation - يعمل
+- [x] اختبار RTL - يعمل
+- [x] Dev server - يعمل بدون أخطاء مشروع
+- [ ] اختبار نظام المجتمع
+- [ ] اختبار نظام الإحالات
+- [ ] إصلاح أي مشاكل
+
+### Phase 6: Save checkpoint and report completion
+- [ ] حفظ checkpoint
+- [ ] تحديث README مع معلومات Neon
+- [ ] توثيق التغييرات

@@ -49,7 +49,7 @@ export default function Navbar() {
           <Link href="/">
             <div className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
               <img 
-                src="/logo.png" 
+                src="/logo-white-bg.png" 
                 alt="بذرة" 
                 className="h-10 w-auto"
               />

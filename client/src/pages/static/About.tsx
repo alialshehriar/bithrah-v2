@@ -55,12 +55,7 @@ export default function About() {
     },
   ];
 
-  const stats = [
-    { value: "2,450+", label: "مستخدم نشط" },
-    { value: "500+", label: "مشروع ناجح" },
-    { value: "50M+", label: "ريال دعم" },
-    { value: "95%", label: "معدل النجاح" },
-  ];
+  // Removed fake stats - will be replaced with real data from DB
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -148,28 +143,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-20">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">إنجازاتنا</h2>
-            <p className="text-xl text-gray-600">
-              أرقام تعكس ثقة مستخدمينا ونجاح منصتنا
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <Card key={index} className="p-8 text-center card-hover">
-                <p className="text-5xl font-bold gradient-text mb-2">
-                  {stat.value}
-                </p>
-                <p className="text-gray-600 text-lg">{stat.label}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Stats section removed - will be replaced with real data from DB */}
 
       {/* Team */}
       <section className="py-20 bg-gray-50">

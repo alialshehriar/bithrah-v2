@@ -59,7 +59,7 @@ export default function Footer() {
             <Link href="/">
               <a className="flex items-center gap-2 mb-4 hover:opacity-90 transition-opacity">
                 <img 
-                  src="/logo-light.png" 
+                  src="/logo-dark-bg.png" 
                   alt="بذرة" 
                   className="h-12 w-auto"
                 />

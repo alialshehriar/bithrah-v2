@@ -1,5 +1,6 @@
 import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 import {
   InsertUser,
   users,
@@ -34,9 +35,11 @@ let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  const dbUrl = ENV.databaseUrl || process.env.DATABASE_URL;
+  if (!_db && dbUrl) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const sql = neon(dbUrl);
+      _db = drizzle(sql);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -103,7 +106,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.updatedAt = now;
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -169,13 +173,13 @@ export async function createIdea(idea: typeof ideas.$inferInsert) {
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(ideas).values({
+  const [result] = await db.insert(ideas).values({
     ...idea,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return getIdeaById(Number(result[0].insertId));
+  return getIdeaById(Number(result.id));
 }
 
 export async function getIdeaById(ideaId: number) {
@@ -231,13 +235,13 @@ export async function createProject(project: typeof projects.$inferInsert) {
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(projects).values({
+  const [result] = await db.insert(projects).values({
     ...project,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return getProjectById(Number(result[0].insertId));
+  return getProjectById(Number(result.id));
 }
 
 export async function getProjectById(projectId: number) {
@@ -384,13 +388,13 @@ export async function createNegotiation(negotiation: typeof negotiations.$inferI
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(negotiations).values({
+  const [result] = await db.insert(negotiations).values({
     ...negotiation,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return getNegotiationById(Number(result[0].insertId));
+  return getNegotiationById(Number(result.id));
 }
 
 export async function getNegotiationById(negotiationId: number) {
@@ -458,13 +462,13 @@ export async function createNegotiationMessage(message: typeof negotiationMessag
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(negotiationMessages).values({
+  const [result] = await db.insert(negotiationMessages).values({
     ...message,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -476,13 +480,13 @@ export async function createReferral(referral: typeof referrals.$inferInsert) {
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(referrals).values({
+  const [result] = await db.insert(referrals).values({
     ...referral,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 export async function getReferralByCode(referralCode: string) {
@@ -523,12 +527,12 @@ export async function createCommission(commission: typeof commissions.$inferInse
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(commissions).values({
+  const [result] = await db.insert(commissions).values({
     ...commission,
     createdAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 export async function getCommissionsByUser(userId: number) {
@@ -551,13 +555,13 @@ export async function createCommunityPost(post: typeof communityPosts.$inferInse
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(communityPosts).values({
+  const [result] = await db.insert(communityPosts).values({
     ...post,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return getCommunityPostById(Number(result[0].insertId));
+  return getCommunityPostById(Number(result.id));
 }
 
 export async function getCommunityPostById(postId: number) {
@@ -648,13 +652,13 @@ export async function createComment(comment: typeof communityComments.$inferInse
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(communityComments).values({
+  const [result] = await db.insert(communityComments).values({
     ...comment,
     createdAt: now,
     updatedAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 export async function toggleReaction(reaction: typeof communityReactions.$inferInsert) {
@@ -782,12 +786,12 @@ export async function createWalletTransaction(transaction: typeof walletTransact
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(walletTransactions).values({
+  const [result] = await db.insert(walletTransactions).values({
     ...transaction,
     createdAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -799,12 +803,12 @@ export async function createNotification(notification: typeof notifications.$inf
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const result = await db.insert(notifications).values({
+  const [result] = await db.insert(notifications).values({
     ...notification,
     createdAt: now,
-  });
+  }).returning();
 
-  return result[0].insertId;
+  return result.id;
 }
 
 export async function getUserNotifications(userId: number, limit: number = 50) {

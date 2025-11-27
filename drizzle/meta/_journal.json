@@ -1,26 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1764249690035,
-      "tag": "0000_public_korath",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1764250006198,
-      "tag": "0001_secret_psynapse",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1764259844643,
-      "tag": "0002_wooden_lethal_legion",
+      "version": "7",
+      "when": 1764279219567,
+      "tag": "0000_nervous_whistler",
       "breakpoints": true
     }
   ]

@@ -87,12 +87,7 @@ export default function Home() {
     },
   ];
 
-  const stats = [
-    { value: "500+", label: "مشروع نشط", icon: FolderKanban },
-    { value: "10K+", label: "مستخدم", icon: Users },
-    { value: "50M+", label: "ريال دعم", icon: TrendingUp },
-    { value: "95%", label: "نسبة النجاح", icon: Star },
-  ];
+  // Removed fake stats - will be replaced with real data from DB
 
   const howItWorks = [
     {
@@ -218,29 +213,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white border-y border-gray-200">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="text-center animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex justify-center mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-bg/10 flex items-center justify-center">
-                    <stat.icon className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div className="text-4xl md:text-5xl font-black gradient-text mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Stats section removed - will be replaced with real data from DB */}
 
       {/* Features Section */}
       <section className="py-20 bg-gray-50">
