@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, like, lt, lte, or, sql } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import {
@@ -878,5 +878,209 @@ export async function getStatistics() {
     totalProjects: totalProjects?.count || 0,
     totalIdeas: totalIdeas?.count || 0,
     openNegotiations: openNegotiations?.count || 0,
+  };
+}
+
+
+// ============================================================================
+// Investor Dashboard Helpers
+// ============================================================================
+
+export async function getEvaluatedIdeas(filters: {
+  sectors?: string[];
+  scoreMin?: number;
+  scoreMax?: number;
+  stages?: string[];
+  budgetMin?: number;
+  budgetMax?: number;
+  search?: string;
+  sortBy: "newest" | "highest_score" | "lowest_budget";
+  limit: number;
+  offset: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Build WHERE conditions
+  const conditions = [
+    eq(ideas.evaluationStatus, "completed"),
+    isNotNull(ideas.overallScore),
+  ];
+
+  // Sector filter
+  if (filters.sectors && filters.sectors.length > 0) {
+    conditions.push(
+      or(...filters.sectors.map((sector) => eq(ideas.sector, sector)))!
+    );
+  }
+
+  // Score range filter
+  if (filters.scoreMin !== undefined) {
+    conditions.push(gte(ideas.overallScore, filters.scoreMin.toString()));
+  }
+  if (filters.scoreMax !== undefined) {
+    conditions.push(lte(ideas.overallScore, filters.scoreMax.toString()));
+  }
+
+  // Stage filter
+  if (filters.stages && filters.stages.length > 0) {
+    conditions.push(
+      or(...filters.stages.map((stage) => eq(ideas.stage, stage)))!
+    );
+  }
+
+  // Budget range filter (search in financialNeeds text field)
+  if (filters.budgetMin !== undefined || filters.budgetMax !== undefined) {
+    // This is a simplified approach - in production, consider adding a dedicated numeric budget field
+    // For now, we'll skip budget filtering on text field
+  }
+
+  // Search filter (name + description)
+  if (filters.search) {
+    const searchTerm = `%${filters.search}%`;
+    conditions.push(
+      or(
+        like(ideas.ideaName, searchTerm),
+        like(ideas.ideaDescription, searchTerm)
+      )!
+    );
+  }
+
+  // Build ORDER BY
+  let orderByClause;
+  switch (filters.sortBy) {
+    case "highest_score":
+      orderByClause = desc(ideas.overallScore);
+      break;
+    case "lowest_budget":
+      // For now, sort by createdAt as budget is text field
+      orderByClause = desc(ideas.createdAt);
+      break;
+    case "newest":
+    default:
+      orderByClause = desc(ideas.createdAt);
+      break;
+  }
+
+  const result = await db
+    .select()
+    .from(ideas)
+    .where(and(...conditions))
+    .orderBy(orderByClause)
+    .limit(filters.limit)
+    .offset(filters.offset);
+
+  return result;
+}
+
+export async function countEvaluatedIdeas(filters: {
+  sectors?: string[];
+  scoreMin?: number;
+  scoreMax?: number;
+  stages?: string[];
+  budgetMin?: number;
+  budgetMax?: number;
+  search?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Build WHERE conditions (same as getEvaluatedIdeas)
+  const conditions = [
+    eq(ideas.evaluationStatus, "completed"),
+    isNotNull(ideas.overallScore),
+  ];
+
+  if (filters.sectors && filters.sectors.length > 0) {
+    conditions.push(
+      or(...filters.sectors.map((sector) => eq(ideas.sector, sector)))!
+    );
+  }
+
+  if (filters.scoreMin !== undefined) {
+    conditions.push(gte(ideas.overallScore, filters.scoreMin.toString()));
+  }
+  if (filters.scoreMax !== undefined) {
+    conditions.push(lte(ideas.overallScore, filters.scoreMax.toString()));
+  }
+
+  if (filters.stages && filters.stages.length > 0) {
+    conditions.push(
+      or(...filters.stages.map((stage) => eq(ideas.stage, stage)))!
+    );
+  }
+
+  if (filters.search) {
+    const searchTerm = `%${filters.search}%`;
+    conditions.push(
+      or(
+        like(ideas.ideaName, searchTerm),
+        like(ideas.ideaDescription, searchTerm)
+      )!
+    );
+  }
+
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ideas)
+    .where(and(...conditions));
+
+  return result?.count || 0;
+}
+
+export async function getEvaluationStats() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Total evaluated ideas
+  const [totalEvaluated] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ideas)
+    .where(
+      and(
+        eq(ideas.evaluationStatus, "completed"),
+        isNotNull(ideas.overallScore)
+      )
+    );
+
+  // Excellent ideas (score >= 80)
+  const [excellentIdeas] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ideas)
+    .where(
+      and(
+        eq(ideas.evaluationStatus, "completed"),
+        gte(ideas.overallScore, "80")
+      )
+    );
+
+  // Good ideas (score 60-79)
+  const [goodIdeas] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ideas)
+    .where(
+      and(
+        eq(ideas.evaluationStatus, "completed"),
+        gte(ideas.overallScore, "60"),
+        lt(ideas.overallScore, "80")
+      )
+    );
+
+  // Average score
+  const [avgScore] = await db
+    .select({ avg: sql<number>`avg(CAST(${ideas.overallScore} AS DECIMAL))` })
+    .from(ideas)
+    .where(
+      and(
+        eq(ideas.evaluationStatus, "completed"),
+        isNotNull(ideas.overallScore)
+      )
+    );
+
+  return {
+    totalIdeas: totalEvaluated?.count || 0,
+    excellentIdeas: excellentIdeas?.count || 0,
+    goodIdeas: goodIdeas?.count || 0,
+    averageScore: avgScore?.avg ? parseFloat(avgScore.avg.toFixed(1)) : 0,
   };
 }

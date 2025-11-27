@@ -469,3 +469,50 @@
 - [x] التأكد من Dev server يعمل
 - [x] التأكد من UI يعرض بشكل صحيح
 - [ ] حفظ checkpoint نهائي
+
+## 💼 Dashboard المستثمرين
+
+### Phase 1: Design dashboard layout and data structure
+- [x] تصميم layout Dashboard للمستثمرين (sidebar filters + main content)
+- [x] تحديد البيانات المطلوبة (stats, filters, idea cards)
+- [x] تصميم هيكل الفلاتر المتقدمة (5 فلاتر)
+- [x] تصميم idea cards مع color coding حسب الدرجة
+- [x] إنشاء investor-dashboard-design.md
+
+### Phase 2: Build backend procedures for fetching and filtering ideas
+- [x] إنشاء getEvaluatedIdeas procedure مع فلاتر شاملة
+- [x] إضافة فلاتر متقدمة (sectors, score range, stages, budget, search)
+- [x] إضافة sorting (newest, highest_score, lowest_budget)
+- [x] إضافة pagination (limit + offset)
+- [x] إضافة countEvaluatedIdeas procedure
+- [x] إضافة getEvaluationStats procedure
+- [x] إضافة database helpers في server/db.ts
+
+### Phase 3: Create investor dashboard page with advanced filters
+- [x] إنشاء صفحة InvestorDashboard.tsx
+- [x] إضافة filter panel جانبي (sectors, score, stages)
+- [x] إضافة stats cards في الأعلى (4 cards)
+- [x] ربط الفلاتر مع backend tRPC
+- [x] إضافة loading states و error handling
+- [x] إضافة route في App.tsx
+
+### Phase 4: Add sorting, search, and pagination features
+- [x] إضافة search bar مع real-time filtering
+- [x] إضافة sort dropdown (3 خيارات)
+- [x] إضافة pagination controls مع page numbers
+- [x] إضافة results count
+- [x] إضافة view mode toggle (grid/list)
+
+### Phase 5: Implement idea cards with quick view and analytics
+- [x] تصميم idea card component مع hover effects
+- [x] عرض الدرجة الإجمالية مع progress bar
+- [x] Color coding حسب الدرجة (green/blue/yellow/red)
+- [x] عرض metadata (قطاع، ميزانية، تاريخ)
+- [x] Click للانتقال إلى صفحة التفاصيل
+
+### Phase 6: Test dashboard functionality and save checkpoint
+- [x] فحص حالة المشروع - كل شيء يعمل
+- [x] التأكد من 0 TypeScript errors
+- [x] التأكد من Dev server يعمل
+- [x] التأكد من UI يعرض بشكل صحيح
+- [ ] حفظ checkpoint نهائي

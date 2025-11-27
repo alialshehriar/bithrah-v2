@@ -9,6 +9,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NewIdea from "./pages/NewIdea";
 import SubmitIdea from "./pages/SubmitIdea";
+import InvestorDashboard from "./pages/InvestorDashboard";
 import IdeaDetails from "./pages/IdeaDetails";
 import MyIdeas from "./pages/MyIdeas";
 import NewProject from "./pages/NewProject";
@@ -36,6 +37,7 @@ function Router() {
       <Route path={"/settings"} component={Settings} />
         <Route path="/ideas/new" component={NewIdea} />
       <Route path="/ideas/submit" component={SubmitIdea} />
+      <Route path="/investors/dashboard" component={InvestorDashboard} />
       <Route path="/ideas/my-ideas" component={MyIdeas} />
       <Route path="/ideas/:id" component={IdeaDetails} />
       <Route path="/projects/new" component={NewProject} />

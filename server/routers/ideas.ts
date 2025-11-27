@@ -260,4 +260,61 @@ export const ideasRouter = router({
 
       return project;
     }),
+
+  // Get all evaluated ideas with advanced filters (for investors)
+  getEvaluatedIdeas: protectedProcedure
+    .input(
+      z.object({
+        sectors: z.array(z.string()).optional(),
+        scoreMin: z.number().min(0).max(100).optional(),
+        scoreMax: z.number().min(0).max(100).optional(),
+        stages: z.array(z.string()).optional(),
+        budgetMin: z.number().min(0).optional(),
+        budgetMax: z.number().min(0).optional(),
+        search: z.string().optional(),
+        sortBy: z.enum(["newest", "highest_score", "lowest_budget"]).optional(),
+        page: z.number().min(1).default(1),
+        pageSize: z.number().min(1).max(50).default(12),
+      })
+    )
+    .query(async ({ input }) => {
+      const offset = (input.page - 1) * input.pageSize;
+
+      const ideas = await db.getEvaluatedIdeas({
+        sectors: input.sectors,
+        scoreMin: input.scoreMin,
+        scoreMax: input.scoreMax,
+        stages: input.stages,
+        budgetMin: input.budgetMin,
+        budgetMax: input.budgetMax,
+        search: input.search,
+        sortBy: input.sortBy || "newest",
+        limit: input.pageSize,
+        offset,
+      });
+
+      const total = await db.countEvaluatedIdeas({
+        sectors: input.sectors,
+        scoreMin: input.scoreMin,
+        scoreMax: input.scoreMax,
+        stages: input.stages,
+        budgetMin: input.budgetMin,
+        budgetMax: input.budgetMax,
+        search: input.search,
+      });
+
+      return {
+        ideas,
+        total,
+        page: input.page,
+        pageSize: input.pageSize,
+        totalPages: Math.ceil(total / input.pageSize),
+      };
+    }),
+
+  // Get evaluation stats (for dashboard)
+  getEvaluationStats: protectedProcedure.query(async () => {
+    const stats = await db.getEvaluationStats();
+    return stats;
+  }),
 });
