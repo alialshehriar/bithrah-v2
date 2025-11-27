@@ -9,9 +9,9 @@ export default function Footer() {
       title: "المنصة",
       links: [
         { label: "عن بذرة", href: "/about" },
-        { label: "كيف يعمل", href: "/how-it-works" },
         { label: "الأسئلة الشائعة", href: "/faq" },
-        { label: "المدونة", href: "/blog" },
+        { label: "اتصل بنا", href: "/contact" },
+        { label: "التسجيل المبكر", href: "/early-access" },
       ],
     },
     {

@@ -47,23 +47,23 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">
-            <a className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <div className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
               <img 
                 src="/logo.png" 
                 alt="بذرة" 
                 className="h-10 w-auto"
               />
-            </a>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
-                <a className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-primary transition-all">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-primary transition-all cursor-pointer">
                   <link.icon className="w-4 h-4" />
                   <span className="font-medium">{link.label}</span>
-                </a>
+                </div>
               </Link>
             ))}
           </div>
@@ -97,30 +97,24 @@ export default function Navbar() {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
-                        <a className="flex items-center gap-2 w-full">
-                          <User className="w-4 h-4" />
-                          <span>الملف الشخصي</span>
-                        </a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/my-projects">
-                        <a className="flex items-center gap-2 w-full">
-                          <FolderKanban className="w-4 h-4" />
-                          <span>مشاريعي</span>
-                        </a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/my-ideas">
-                        <a className="flex items-center gap-2 w-full">
-                          <Lightbulb className="w-4 h-4" />
-                          <span>أفكاري</span>
-                        </a>
-                      </Link>
-                    </DropdownMenuItem>
+                    <Link href="/profile">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <User className="w-4 h-4 ml-2" />
+                        <span>الملف الشخصي</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/my-projects">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <FolderKanban className="w-4 h-4 ml-2" />
+                        <span>مشاريعي</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/my-ideas">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Lightbulb className="w-4 h-4 ml-2" />
+                        <span>أفكاري</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                       تسجيل الخروج
