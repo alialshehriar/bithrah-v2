@@ -577,59 +577,129 @@ export default function ProjectDetails() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Packages */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">باقات الدعم</h2>
-                {project.packages.map((pkg) => (
-                  <Card
-                    key={pkg.id}
-                    className={`p-6 space-y-4 cursor-pointer transition-all ${
-                      selectedPackage === pkg.id
-                        ? "ring-2 ring-primary shadow-lg"
-                        : "hover:shadow-md"
-                    }`}
-                    onClick={() => setSelectedPackage(pkg.id)}
-                  >
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{pkg.title}</h3>
-                      <p className="text-2xl font-bold text-primary mt-2">
-                        {pkg.amount.toLocaleString()} ريال
-                      </p>
-                    </div>
-
-                    <p className="text-gray-600">{pkg.description}</p>
-
-                    <ul className="space-y-2">
-                      {pkg.rewards.map((reward, index) => (
-                        <li key={index} className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span>{reward}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Separator />
-
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center justify-between">
-                        <span>عدد الداعمين</span>
-                        <span className="font-semibold">{pkg.backersCount}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>التسليم المتوقع</span>
-                        <span className="font-semibold">
-                          {new Date(pkg.deliveryDate).toLocaleDateString("ar-SA")}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full gradient-bg btn-hover"
-                      onClick={() => handleBackProject(pkg.id)}
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">باقات الدعم</h2>
+                  <Badge variant="secondary" className="text-sm">
+                    {project.packages.length} باقات
+                  </Badge>
+                </div>
+                
+                <div className="space-y-4">
+                  {project.packages.map((pkg, index) => (
+                    <Card
+                      key={pkg.id}
+                      className={`relative overflow-hidden transition-all duration-300 ${
+                        selectedPackage === pkg.id
+                          ? "ring-2 ring-primary shadow-xl scale-[1.02]"
+                          : "hover:shadow-lg hover:scale-[1.01]"
+                      }`}
                     >
-                      اختر هذه الباقة
-                    </Button>
-                  </Card>
-                ))}
+                      {/* Popular Badge */}
+                      {index === 1 && (
+                        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-secondary py-1.5 text-center">
+                          <span className="text-white text-xs font-bold">⭐ الأكثر شعبية</span>
+                        </div>
+                      )}
+                      
+                      <div 
+                        className={`p-6 space-y-5 cursor-pointer ${index === 1 ? 'pt-10' : ''}`}
+                        onClick={() => setSelectedPackage(pkg.id)}
+                      >
+                        {/* Header */}
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="text-xl font-bold text-gray-900">{pkg.title}</h3>
+                            <Badge 
+                              variant="outline" 
+                              className="bg-green-50 text-green-700 border-green-200 flex-shrink-0"
+                            >
+                              <Users className="w-3 h-3 ml-1" />
+                              {pkg.backersCount} داعم
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                              {pkg.amount.toLocaleString()}
+                            </span>
+                            <span className="text-lg text-gray-600">ريال</span>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-gray-700 leading-relaxed">{pkg.description}</p>
+
+                        <Separator className="my-4" />
+
+                        {/* Rewards */}
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-gray-900 text-sm">يتضمن:</h4>
+                          <ul className="space-y-2.5">
+                            {pkg.rewards.map((reward, idx) => (
+                              <li key={idx} className="flex items-start gap-3 text-sm text-gray-700">
+                                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                </div>
+                                <span className="leading-relaxed">{reward}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        {/* Meta Info */}
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span>التسليم المتوقع</span>
+                            </div>
+                            <p className="font-semibold text-gray-900">
+                              {new Date(pkg.deliveryDate).toLocaleDateString("ar-SA", {
+                                year: "numeric",
+                                month: "long"
+                              })}
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 text-gray-600">
+                              <Target className="w-4 h-4" />
+                              <span>متبقي</span>
+                            </div>
+                            <p className="font-semibold text-green-600">
+                              {pkg.isAvailable ? "غير محدود" : "نفدت"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* CTA Button */}
+                        <Button
+                          className={`w-full h-12 text-base font-semibold transition-all ${
+                            selectedPackage === pkg.id
+                              ? "gradient-bg btn-hover shadow-lg"
+                              : "bg-white border-2 border-primary text-primary hover:gradient-bg hover:text-white hover:border-transparent"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBackProject(pkg.id);
+                          }}
+                        >
+                          {selectedPackage === pkg.id ? (
+                            <>
+                              <CheckCircle2 className="w-5 h-5 ml-2" />
+                              تم اختيار هذه الباقة
+                            </>
+                          ) : (
+                            "اختر هذه الباقة"
+                          )}
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
 
               {/* Project Links */}

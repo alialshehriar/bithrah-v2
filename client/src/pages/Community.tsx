@@ -36,6 +36,7 @@ import { toast } from "sonner";
 export default function Community() {
   const [newPostContent, setNewPostContent] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
+  const [sortBy, setSortBy] = useState("recent"); // recent, popular, following
   const [showNewPost, setShowNewPost] = useState(false);
 
   // TODO: Replace with actual API calls
@@ -49,7 +50,6 @@ export default function Community() {
         id: 1,
         name: "أحمد محمد",
         avatar: null,
-        role: "project_owner",
         verified: true,
       },
       content: "متحمس جداً لإطلاق منصتنا التعليمية الجديدة! بعد 6 أشهر من العمل المتواصل، أصبحنا جاهزين للإطلاق التجريبي. شكراً لكل من دعمنا في هذه الرحلة 🚀",
@@ -70,7 +70,6 @@ export default function Community() {
         id: 2,
         name: "سارة أحمد",
         avatar: null,
-        role: "investor",
         verified: false,
       },
       content: "ما هي أفضل الممارسات لتقييم جدوى المشاريع الناشئة؟ أبحث عن نصائح من المستثمرين ذوي الخبرة.",
@@ -89,7 +88,6 @@ export default function Community() {
         id: 3,
         name: "خالد علي",
         avatar: null,
-        role: "user",
         verified: false,
       },
       content: "نصيحة لكل رائد أعمال: ابدأ صغيراً، تعلم بسرعة، وتوسع بحكمة. النجاح ليس سباقاً، بل ماراثون 💪",
@@ -108,7 +106,6 @@ export default function Community() {
         id: 4,
         name: "نورة سعد",
         avatar: null,
-        role: "marketer",
         verified: true,
       },
       content: "ورشة عمل مجانية عن التسويق الرقمي للمشاريع الناشئة! سأشارك استراتيجيات عملية ساعدت أكثر من 50 مشروع على النمو. من يهتم؟",
@@ -186,15 +183,7 @@ export default function Community() {
     toast.success("تمت المتابعة بنجاح");
   };
 
-  const getRoleBadge = (role: string) => {
-    const badges = {
-      project_owner: { label: "صاحب مشروع", color: "bg-blue-100 text-blue-700" },
-      investor: { label: "مستثمر", color: "bg-green-100 text-green-700" },
-      marketer: { label: "مسوق", color: "bg-purple-100 text-purple-700" },
-      user: { label: "عضو", color: "bg-gray-100 text-gray-700" },
-    };
-    return badges[role as keyof typeof badges] || badges.user;
-  };
+  // Removed getRoleBadge - all users are now unified
 
   const formatDate = (date: string) => {
     const now = new Date();
@@ -205,6 +194,36 @@ export default function Community() {
     if (diffInHours < 24) return `منذ ${diffInHours} ساعة`;
     if (diffInHours < 48) return "منذ يوم";
     return `منذ ${Math.floor(diffInHours / 24)} أيام`;
+  };
+
+  // Filter and sort posts
+  const getFilteredPosts = (posts: any[], tab: string, sort: string) => {
+    let filtered = [...posts];
+
+    // Filter by tab
+    if (tab === "projects") {
+      filtered = filtered.filter(post => post.projectId);
+    } else if (tab === "trending") {
+      // Show posts with high engagement
+      filtered = filtered.filter(post => post.likes > 100 || post.comments > 20);
+    } else if (tab === "following") {
+      // TODO: Filter by following (mock for now)
+      filtered = filtered.slice(0, 2);
+    }
+
+    // Sort
+    if (sort === "popular") {
+      filtered.sort((a, b) => {
+        const aScore = a.likes + a.comments * 2 + a.shares * 3;
+        const bScore = b.likes + b.comments * 2 + b.shares * 3;
+        return bScore - aScore;
+      });
+    } else {
+      // recent (default)
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return filtered;
   };
 
   return (
@@ -327,21 +346,67 @@ export default function Community() {
                 )}
               </Card>
 
-              {/* Filter Tabs */}
-              <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-                <TabsList className="w-full grid grid-cols-4">
-                  <TabsTrigger value="all">الكل</TabsTrigger>
-                  <TabsTrigger value="following">المتابَعون</TabsTrigger>
-                  <TabsTrigger value="trending">الرائج</TabsTrigger>
-                  <TabsTrigger value="projects">المشاريع</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              {/* Filter Tabs & Sort */}
+              <Card className="p-4 space-y-4">
+                <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+                  <TabsList className="w-full grid grid-cols-4 h-11">
+                    <TabsTrigger value="all" className="text-sm">
+                      <TrendingUp className="w-4 h-4 ml-1" />
+                      الكل
+                    </TabsTrigger>
+                    <TabsTrigger value="following" className="text-sm">
+                      <Users className="w-4 h-4 ml-1" />
+                      المتابَعون
+                    </TabsTrigger>
+                    <TabsTrigger value="trending" className="text-sm">
+                      <Lightbulb className="w-4 h-4 ml-1" />
+                      الرائج
+                    </TabsTrigger>
+                    <TabsTrigger value="projects" className="text-sm">
+                      <Bookmark className="w-4 h-4 ml-1" />
+                      المشاريع
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {/* Sort Options */}
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-600">ترتيب حسب:</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={sortBy === "recent" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSortBy("recent")}
+                      className={sortBy === "recent" ? "gradient-bg" : ""}
+                    >
+                      الأحدث
+                    </Button>
+                    <Button
+                      variant={sortBy === "popular" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSortBy("popular")}
+                      className={sortBy === "popular" ? "gradient-bg" : ""}
+                    >
+                      الأكثر تفاعلاً
+                    </Button>
+                  </div>
+                </div>
+              </Card>
 
               {/* Posts Feed */}
               <div className="space-y-6">
-                {posts.map((post) => {
-                  const roleBadge = getRoleBadge(post.user.role);
-
+                {getFilteredPosts(posts, selectedTab, sortBy).length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <div className="space-y-3">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                        <MessageCircle className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">لا توجد منشورات</h3>
+                      <p className="text-gray-600">جرب تغيير الفلتر أو كن أول من ينشر!</p>
+                    </div>
+                  </Card>
+                ) : (
+                  getFilteredPosts(posts, selectedTab, sortBy).map((post) => {
                   return (
                     <Card key={post.id} className="p-6 space-y-4">
                       {/* Post Header */}
@@ -365,9 +430,6 @@ export default function Community() {
                                   ✓ موثق
                                 </Badge>
                               )}
-                              <Badge className={`text-xs ${roleBadge.color}`}>
-                                {roleBadge.label}
-                              </Badge>
                             </div>
                             <p className="text-sm text-gray-500">{formatDate(post.createdAt)}</p>
                           </div>
@@ -397,7 +459,7 @@ export default function Community() {
                       {/* Post Images */}
                       {post.images && post.images.length > 0 && (
                         <div className="grid grid-cols-1 gap-2">
-                          {post.images.map((image, index) => (
+                          {post.images.map((image: string, index: number) => (
                             <div
                               key={index}
                               className="relative aspect-video rounded-lg overflow-hidden bg-gray-100"
@@ -463,7 +525,8 @@ export default function Community() {
                       </div>
                     </Card>
                   );
-                })}
+                })
+                )}
               </div>
 
               {/* Load More */}

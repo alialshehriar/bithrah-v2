@@ -36,7 +36,6 @@ export const users = mysqlTable(
     phone: varchar("phone", { length: 50 }),
 
     // User Type & Status
-    userType: mysqlEnum("userType", ["user", "project_owner", "investor", "marketer"]).default("user").notNull(),
     role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
     isVerified: boolean("isVerified").default(false).notNull(),
     isEarlyAccess: boolean("isEarlyAccess").default(false).notNull(),
@@ -68,7 +67,6 @@ export const users = mysqlTable(
   (table) => ({
     emailIdx: index("email_idx").on(table.email),
     usernameIdx: uniqueIndex("username_idx").on(table.username),
-    userTypeIdx: index("user_type_idx").on(table.userType),
   })
 );
 
