@@ -11,6 +11,9 @@ import NewIdea from "./pages/NewIdea";
 import IdeaDetails from "./pages/IdeaDetails";
 import MyIdeas from "./pages/MyIdeas";
 import NewProject from "./pages/NewProject";
+import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
+import Community from "./pages/Community";
 
 function Router() {
   return (
@@ -22,6 +25,9 @@ function Router() {
       <Route path="/ideas/my-ideas" component={MyIdeas} />
       <Route path="/ideas/:id" component={IdeaDetails} />
       <Route path="/projects/new" component={NewProject} />
+      <Route path="/projects/:id" component={ProjectDetails} />
+      <Route path="/projects" component={Projects} />
+      <Route path="/community" component={Community} />
       <Route path={"/404"} component={NotFound} />
       {/* TODO: Add more routes here as we build pages */}
       {/* Final fallback route */}

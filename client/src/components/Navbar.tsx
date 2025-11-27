@@ -47,28 +47,12 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/">
-            <a className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="flex items-center gap-2">
-                {/* Icon */}
-                <div className="w-8 h-8 rounded-lg bg-gradient-bg flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="w-5 h-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 2L12 12M12 12L12 22M12 12L22 12M12 12L2 12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="12" cy="12" r="3" fill="currentColor" />
-                  </svg>
-                </div>
-                {/* Text */}
-                <span className="text-2xl font-bold gradient-text">بذرة</span>
-              </div>
+            <a className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+              <img 
+                src="/logo.png" 
+                alt="بذرة" 
+                className="h-10 w-auto"
+              />
             </a>
           </Link>
 

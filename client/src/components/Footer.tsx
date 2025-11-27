@@ -58,24 +58,12 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link href="/">
-              <a className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-                <div className="w-10 h-10 rounded-lg bg-gradient-bg flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="w-6 h-6 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 2L12 12M12 12L12 22M12 12L22 12M12 12L2 12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="12" cy="12" r="3" fill="currentColor" />
-                  </svg>
-                </div>
-                <span className="text-2xl font-bold text-white">بذرة</span>
+              <a className="flex items-center gap-2 mb-4 hover:opacity-90 transition-opacity">
+                <img 
+                  src="/logo-light.png" 
+                  alt="بذرة" 
+                  className="h-12 w-auto"
+                />
               </a>
             </Link>
             <p className="text-sm text-gray-400 mb-6 leading-relaxed">
