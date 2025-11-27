@@ -1,7 +1,34 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  users,
+  ideas,
+  projects,
+  projectPackages,
+  projectBackings,
+  negotiations,
+  negotiationMessages,
+  referrals,
+  commissions,
+  communityPosts,
+  communityComments,
+  communityReactions,
+  follows,
+  notifications,
+  userWallets,
+  walletTransactions,
+  projectTeamMembers,
+  projectMedia,
+  projectLinks,
+  projectUpdates,
+  projectComments,
+  type Idea,
+  type Project,
+  type CommunityPost,
+  type Negotiation,
+} from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -18,6 +45,10 @@ export async function getDb() {
   return _db;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// USER HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
@@ -30,8 +61,13 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
+    const now = new Date();
     const values: InsertUser = {
       openId: user.openId,
+      email: user.email || "",
+      createdAt: now,
+      updatedAt: now,
+      lastSignedIn: user.lastSignedIn || now,
     };
     const updateSet: Record<string, unknown> = {};
 
@@ -56,16 +92,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
+    updateSet.updatedAt = now;
 
     if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
+      updateSet.lastSignedIn = now;
+      updateSet.updatedAt = now;
     }
 
     await db.insert(users).values(values).onDuplicateKeyUpdate({
@@ -89,4 +124,755 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByUsername(username: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateUser(userId: number, updates: Partial<InsertUser>) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(users)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+
+  return getUserById(userId);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// IDEA HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createIdea(idea: typeof ideas.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(ideas).values({
+    ...idea,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return getIdeaById(Number(result[0].insertId));
+}
+
+export async function getIdeaById(ideaId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(ideas).where(eq(ideas.id, ideaId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getIdeasByUser(userId: number, includeDemo: boolean = false) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [eq(ideas.userId, userId)];
+  if (!includeDemo) {
+    conditions.push(eq(ideas.isDemo, false));
+  }
+
+  return db
+    .select()
+    .from(ideas)
+    .where(and(...conditions))
+    .orderBy(desc(ideas.createdAt));
+}
+
+export async function updateIdea(ideaId: number, updates: Partial<typeof ideas.$inferInsert>) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(ideas)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(ideas.id, ideaId));
+
+  return getIdeaById(ideaId);
+}
+
+export async function deleteIdea(ideaId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db.update(ideas).set({ deletedAt: new Date() }).where(eq(ideas.id, ideaId));
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROJECT HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createProject(project: typeof projects.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(projects).values({
+    ...project,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return getProjectById(Number(result[0].insertId));
+}
+
+export async function getProjectById(projectId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getProjectBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(projects).where(eq(projects.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getProjects(filters: {
+  status?: string;
+  userId?: number;
+  includeDemo?: boolean;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [];
+  if (filters.status) {
+    conditions.push(eq(projects.status, filters.status as any));
+  }
+  if (filters.userId) {
+    conditions.push(eq(projects.userId, filters.userId));
+  }
+  if (!filters.includeDemo) {
+    conditions.push(eq(projects.isDemo, false));
+  }
+
+  let query = db
+    .select()
+    .from(projects)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(projects.createdAt));
+
+  if (filters.limit) {
+    query = query.limit(filters.limit) as any;
+  }
+  if (filters.offset) {
+    query = query.offset(filters.offset) as any;
+  }
+
+  return query;
+}
+
+export async function updateProject(projectId: number, updates: Partial<typeof projects.$inferInsert>) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(projects)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(projects.id, projectId));
+
+  return getProjectById(projectId);
+}
+
+export async function deleteProject(projectId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db.update(projects).set({ deletedAt: new Date() }).where(eq(projects.id, projectId));
+  return true;
+}
+
+export async function getProjectPackages(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(projectPackages)
+    .where(eq(projectPackages.projectId, projectId))
+    .orderBy(projectPackages.displayOrder);
+}
+
+export async function getProjectTeamMembers(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(projectTeamMembers)
+    .where(eq(projectTeamMembers.projectId, projectId))
+    .orderBy(projectTeamMembers.displayOrder);
+}
+
+export async function getProjectMedia(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(projectMedia)
+    .where(eq(projectMedia.projectId, projectId))
+    .orderBy(projectMedia.displayOrder);
+}
+
+export async function getProjectLinks(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(projectLinks).where(eq(projectLinks.projectId, projectId));
+}
+
+export async function getProjectUpdates(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(projectUpdates)
+    .where(eq(projectUpdates.projectId, projectId))
+    .orderBy(desc(projectUpdates.createdAt));
+}
+
+export async function getProjectComments(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(projectComments)
+    .where(and(eq(projectComments.projectId, projectId), eq(projectComments.isDeleted, false)))
+    .orderBy(desc(projectComments.createdAt));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NEGOTIATION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createNegotiation(negotiation: typeof negotiations.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(negotiations).values({
+    ...negotiation,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return getNegotiationById(Number(result[0].insertId));
+}
+
+export async function getNegotiationById(negotiationId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(negotiations)
+    .where(eq(negotiations.id, negotiationId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getNegotiationsByProject(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(negotiations)
+    .where(eq(negotiations.projectId, projectId))
+    .orderBy(desc(negotiations.createdAt));
+}
+
+export async function getNegotiationsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(negotiations)
+    .where(or(eq(negotiations.investorId, userId), eq(negotiations.projectOwnerId, userId)))
+    .orderBy(desc(negotiations.createdAt));
+}
+
+export async function updateNegotiation(
+  negotiationId: number,
+  updates: Partial<typeof negotiations.$inferInsert>
+) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(negotiations)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(negotiations.id, negotiationId));
+
+  return getNegotiationById(negotiationId);
+}
+
+export async function getNegotiationMessages(negotiationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(negotiationMessages)
+    .where(eq(negotiationMessages.negotiationId, negotiationId))
+    .orderBy(negotiationMessages.createdAt);
+}
+
+export async function createNegotiationMessage(message: typeof negotiationMessages.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(negotiationMessages).values({
+    ...message,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REFERRAL & COMMISSION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createReferral(referral: typeof referrals.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(referrals).values({
+    ...referral,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+export async function getReferralByCode(referralCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(referrals)
+    .where(eq(referrals.referralCode, referralCode))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getReferralsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(referrals)
+    .where(eq(referrals.referrerUserId, userId))
+    .orderBy(desc(referrals.createdAt));
+}
+
+export async function updateReferral(referralId: number, updates: Partial<typeof referrals.$inferInsert>) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(referrals)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(referrals.id, referralId));
+}
+
+export async function createCommission(commission: typeof commissions.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(commissions).values({
+    ...commission,
+    createdAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+export async function getCommissionsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(commissions)
+    .where(eq(commissions.userId, userId))
+    .orderBy(desc(commissions.createdAt));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMMUNITY HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createCommunityPost(post: typeof communityPosts.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(communityPosts).values({
+    ...post,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return getCommunityPostById(Number(result[0].insertId));
+}
+
+export async function getCommunityPostById(postId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(communityPosts)
+    .where(eq(communityPosts.id, postId))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getCommunityPosts(filters: {
+  userId?: number;
+  includeDemo?: boolean;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [eq(communityPosts.isDeleted, false), eq(communityPosts.isHidden, false)];
+
+  if (filters.userId) {
+    conditions.push(eq(communityPosts.userId, filters.userId));
+  }
+  if (!filters.includeDemo) {
+    conditions.push(eq(communityPosts.isDemo, false));
+  }
+
+  let query = db
+    .select()
+    .from(communityPosts)
+    .where(and(...conditions))
+    .orderBy(desc(communityPosts.createdAt));
+
+  if (filters.limit) {
+    query = query.limit(filters.limit) as any;
+  }
+  if (filters.offset) {
+    query = query.offset(filters.offset) as any;
+  }
+
+  return query;
+}
+
+export async function updateCommunityPost(
+  postId: number,
+  updates: Partial<typeof communityPosts.$inferInsert>
+) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db
+    .update(communityPosts)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(communityPosts.id, postId));
+
+  return getCommunityPostById(postId);
+}
+
+export async function deleteCommunityPost(postId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db
+    .update(communityPosts)
+    .set({ isDeleted: true, deletedAt: new Date() })
+    .where(eq(communityPosts.id, postId));
+  return true;
+}
+
+export async function getPostComments(postId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(communityComments)
+    .where(and(eq(communityComments.postId, postId), eq(communityComments.isDeleted, false)))
+    .orderBy(communityComments.createdAt);
+}
+
+export async function createComment(comment: typeof communityComments.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(communityComments).values({
+    ...comment,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+export async function toggleReaction(reaction: typeof communityReactions.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Check if reaction exists
+  const conditions = [eq(communityReactions.userId, reaction.userId)];
+  if (reaction.postId) {
+    conditions.push(eq(communityReactions.postId, reaction.postId));
+  }
+  if (reaction.commentId) {
+    conditions.push(eq(communityReactions.commentId, reaction.commentId));
+  }
+
+  const existing = await db
+    .select()
+    .from(communityReactions)
+    .where(and(...conditions))
+    .limit(1);
+
+  if (existing.length > 0) {
+    // Remove reaction
+    await db.delete(communityReactions).where(eq(communityReactions.id, existing[0].id));
+    return { action: "removed" };
+  } else {
+    // Add reaction
+    const now = new Date();
+    await db.insert(communityReactions).values({
+      ...reaction,
+      createdAt: now,
+    });
+    return { action: "added" };
+  }
+}
+
+export async function followUser(followerId: number, followingId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  await db.insert(follows).values({
+    followerId,
+    followingId,
+    createdAt: now,
+  });
+}
+
+export async function unfollowUser(followerId: number, followingId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db
+    .delete(follows)
+    .where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
+  return true;
+}
+
+export async function isFollowing(followerId: number, followingId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  const result = await db
+    .select()
+    .from(follows)
+    .where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)))
+    .limit(1);
+
+  return result.length > 0;
+}
+
+export async function getFollowers(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(follows).where(eq(follows.followingId, userId));
+}
+
+export async function getFollowing(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(follows).where(eq(follows.followerId, userId));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WALLET HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function getUserWallet(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(userWallets).where(eq(userWallets.userId, userId)).limit(1);
+
+  if (result.length > 0) {
+    return result[0];
+  }
+
+  // Create wallet if doesn't exist
+  const now = new Date();
+  await db.insert(userWallets).values({
+    userId,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return getUserWallet(userId);
+}
+
+export async function getWalletTransactions(userId: number, limit: number = 50) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(walletTransactions)
+    .where(eq(walletTransactions.userId, userId))
+    .orderBy(desc(walletTransactions.createdAt))
+    .limit(limit);
+}
+
+export async function createWalletTransaction(transaction: typeof walletTransactions.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(walletTransactions).values({
+    ...transaction,
+    createdAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NOTIFICATION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function createNotification(notification: typeof notifications.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const result = await db.insert(notifications).values({
+    ...notification,
+    createdAt: now,
+  });
+
+  return result[0].insertId;
+}
+
+export async function getUserNotifications(userId: number, limit: number = 50) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.userId, userId))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+}
+
+export async function markNotificationAsRead(notificationId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db
+    .update(notifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(eq(notifications.id, notificationId));
+  return true;
+}
+
+export async function markAllNotificationsAsRead(userId: number) {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db
+    .update(notifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATISTICS HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export async function getStatistics() {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [totalUsers] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(users)
+    .where(eq(users.isActive, true));
+
+  const [totalProjects] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(projects)
+    .where(and(eq(projects.status, "published"), eq(projects.isDemo, false)));
+
+  const [totalIdeas] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ideas)
+    .where(eq(ideas.isDemo, false));
+
+  const [openNegotiations] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(negotiations)
+    .where(or(eq(negotiations.status, "open"), eq(negotiations.status, "in_progress")));
+
+  return {
+    totalUsers: totalUsers?.count || 0,
+    totalProjects: totalProjects?.count || 0,
+    totalIdeas: totalIdeas?.count || 0,
+    openNegotiations: openNegotiations?.count || 0,
+  };
+}
