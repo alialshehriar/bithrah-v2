@@ -1,0 +1,28 @@
+# بذرة - منصة الوساطة الذكية
+# https://bithrahapp.com
+
+User-agent: *
+Allow: /
+
+# الصفحات المسموح بها
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /terms
+Allow: /privacy
+Allow: /projects
+Allow: /community
+Allow: /early-access
+
+# الصفحات الممنوعة
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /settings
+Disallow: /profile
+Disallow: /negotiations
+Disallow: /marketer
+
+# Sitemap
+Sitemap: https://bithrahapp.com/sitemap.xml
