@@ -151,13 +151,13 @@ export default function Navbar() {
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
-                  <a
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-primary transition-all"
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-primary transition-all cursor-pointer"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <link.icon className="w-5 h-5" />
                     <span className="font-medium">{link.label}</span>
-                  </a>
+                  </div>
                 </Link>
               ))}
               {!isAuthenticated && (

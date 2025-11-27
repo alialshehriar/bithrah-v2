@@ -74,7 +74,7 @@ export default function Home() {
   const stats = [
     { value: "500+", label: "مشروع نشط", icon: FolderKanban },
     { value: "10K+", label: "مستخدم", icon: Users },
-    { value: "50M+", label: "ريال تمويل", icon: TrendingUp },
+    { value: "50M+", label: "ريال دعم", icon: TrendingUp },
     { value: "95%", label: "نسبة النجاح", icon: Star },
   ];
 

@@ -125,7 +125,7 @@ export default function Community() {
 
   const trendingTopics = [
     { tag: "ريادة_الأعمال", count: 1234 },
-    { tag: "التمويل_الجماعي", count: 892 },
+    { tag: "الدعم_الجماعي", count: 892 },
     { tag: "الذكاء_الاصطناعي", count: 756 },
     { tag: "التسويق_الرقمي", count: 645 },
     { tag: "التقنية", count: 534 },

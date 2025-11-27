@@ -62,7 +62,7 @@ export default function Projects() {
   const statusOptions = [
     { value: "all", label: "جميع الحالات" },
     { value: "active", label: "نشط" },
-    { value: "funded", label: "مكتمل التمويل" },
+    { value: "funded", label: "مكتمل الدعم" },
     { value: "ended", label: "منتهي" },
   ];
 
@@ -70,7 +70,7 @@ export default function Projects() {
     { value: "trending", label: "الأكثر رواجاً" },
     { value: "newest", label: "الأحدث" },
     { value: "ending-soon", label: "ينتهي قريباً" },
-    { value: "most-funded", label: "الأكثر تمويلاً" },
+    { value: "most-funded", label: "الأكثر دعماً" },
     { value: "most-backers", label: "الأكثر داعمين" },
   ];
 
@@ -91,86 +91,7 @@ export default function Projects() {
       owner: { name: "أحمد محمد", avatar: null },
       isFeatured: true,
       isNew: false,
-    },
-    {
-      id: 2,
-      title: "تطبيق توصيل طعام صحي",
-      slug: "healthy-food-delivery",
-      description: "تطبيق متخصص في توصيل الوجبات الصحية المعدة من قبل خبراء تغذية",
-      category: "طعام",
-      status: "active",
-      goalAmount: 300000,
-      currentAmount: 180000,
-      backersCount: 89,
-      daysLeft: 15,
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800",
-      owner: { name: "سارة أحمد", avatar: null },
-      isFeatured: false,
-      isNew: true,
-    },
-    {
-      id: 3,
-      title: "منصة حجز استشارات طبية عن بُعد",
-      slug: "telemedicine-platform",
-      description: "منصة تربط المرضى بالأطباء المتخصصين لاستشارات طبية فورية عبر الفيديو",
-      category: "صحة",
-      status: "active",
-      goalAmount: 800000,
-      currentAmount: 650000,
-      backersCount: 234,
-      daysLeft: 8,
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800",
-      owner: { name: "د. خالد علي", avatar: null },
-      isFeatured: true,
-      isNew: false,
-    },
-    {
-      id: 4,
-      title: "تطبيق إدارة الاستثمارات الشخصية",
-      slug: "personal-investment-app",
-      description: "تطبيق ذكي يساعدك على إدارة استثماراتك وتتبع أدائها بسهولة",
-      category: "مالية",
-      status: "active",
-      goalAmount: 600000,
-      currentAmount: 420000,
-      backersCount: 178,
-      daysLeft: 30,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      owner: { name: "عمر سعيد", avatar: null },
-      isFeatured: false,
-      isNew: false,
-    },
-    {
-      id: 5,
-      title: "متجر إلكتروني للمنتجات اليدوية",
-      slug: "handmade-marketplace",
-      description: "منصة تجمع الحرفيين والمبدعين لبيع منتجاتهم اليدوية الفريدة",
-      category: "تجارة إلكترونية",
-      status: "active",
-      goalAmount: 400000,
-      currentAmount: 280000,
-      backersCount: 145,
-      daysLeft: 18,
-      image: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=800",
-      owner: { name: "نورة خالد", avatar: null },
-      isFeatured: false,
-      isNew: true,
-    },
-    {
-      id: 6,
-      title: "منصة تعلم البرمجة للمبتدئين",
-      slug: "coding-learning-platform",
-      description: "منصة تفاعلية لتعلم البرمجة من الصفر مع مشاريع عملية",
-      category: "تقنية",
-      status: "funded",
-      goalAmount: 350000,
-      currentAmount: 380000,
-      backersCount: 267,
-      daysLeft: 0,
-      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
-      owner: { name: "فهد محمد", avatar: null },
-      isFeatured: false,
-      isNew: false,
+      isDemo: true,
     },
   ];
 
@@ -345,6 +266,12 @@ export default function Projects() {
 
                         {/* Badges */}
                         <div className="absolute top-3 right-3 flex flex-col gap-2">
+                          {project.isDemo && (
+                            <Badge className="bg-orange-500 hover:bg-orange-500">
+                              <AlertCircle className="w-3 h-3 ml-1" />
+                              عرض توضيحي
+                            </Badge>
+                          )}
                           {project.isFeatured && (
                             <Badge className="bg-yellow-500 hover:bg-yellow-500">
                               <Sparkles className="w-3 h-3 ml-1" />
@@ -450,7 +377,7 @@ export default function Projects() {
                 هل لديك فكرة مشروع؟
               </h2>
               <p className="text-xl text-white/90">
-                ابدأ مشروعك الآن واحصل على التمويل والدعم الذي تحتاجه
+                ابدأ مشروعك الآن واحصل على الدعم الذي تحتاجه
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button size="lg" variant="secondary" asChild>

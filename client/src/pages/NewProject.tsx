@@ -72,7 +72,7 @@ type ProjectFormData = {
 const STEPS = [
   { id: 1, title: "المعلومات الأساسية", description: "عنوان المشروع ووصفه" },
   { id: 2, title: "التفاصيل", description: "المشكلة والحل والقيمة" },
-  { id: 3, title: "التمويل", description: "الهدف والمدة" },
+  { id: 3, title: "الدعم", description: "الهدف والمدة" },
   { id: 4, title: "الوسائط", description: "الصور والفيديو" },
   { id: 5, title: "الفريق والروابط", description: "أعضاء الفريق والروابط" },
   { id: 6, title: "الباقات", description: "باقات الدعم (اختياري)" },
@@ -153,7 +153,7 @@ export default function NewProject() {
       
       case 3:
         if (!formData.fundingGoal || parseInt(formData.fundingGoal) < 1000) {
-          toast.error("هدف التمويل يجب أن يكون 1000 ريال على الأقل");
+          toast.error("هدف الدعم يجب أن يكون 1000 ريال على الأقل");
           return false;
         }
         return true;
@@ -512,7 +512,7 @@ export default function NewProject() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="fundingGoal" className="text-base font-semibold">
-                        هدف التمويل <span className="text-red-500">*</span>
+                        هدف الدعم <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="fundingGoal"
@@ -546,7 +546,7 @@ export default function NewProject() {
 
                   <div className="space-y-2">
                     <Label htmlFor="fundingType" className="text-base font-semibold">
-                      نوع التمويل
+                      نوع الدعم
                     </Label>
                     <Select value={formData.fundingType} onValueChange={(value) => handleChange("fundingType", value)}>
                       <SelectTrigger id="fundingType">
@@ -581,10 +581,10 @@ export default function NewProject() {
                     <div className="flex items-start gap-3">
                       <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-blue-900">
-                        <p className="font-semibold mb-1">ملاحظة حول التمويل:</p>
+                        <p className="font-semibold mb-1">ملاحظة حول الدعم:</p>
                         <ul className="list-disc list-inside space-y-1">
-                          <li>التمويل المرن: تحصل على المبلغ المجموع حتى لو لم تصل للهدف</li>
-                          <li>التمويل الثابت: تحصل على المبلغ فقط إذا وصلت للهدف الكامل</li>
+                          <li>الدعم المرن: تحصل على المبلغ المجموع حتى لو لم تصل للهدف</li>
+                          <li>الدعم الثابت: تحصل على المبلغ فقط إذا وصلت للهدف الكامل</li>
                           <li>العمولة الأساسية: 5% من المبلغ المجموع</li>
                           <li>العمولة مع التفاوض: 10% من المبلغ المجموع</li>
                         </ul>
