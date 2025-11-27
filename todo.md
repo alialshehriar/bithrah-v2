@@ -427,3 +427,45 @@
 - [ ] حفظ checkpoint
 - [ ] تحديث README مع معلومات Neon
 - [ ] توثيق التغييرات
+
+
+## 🤖 نظام تقييم الأفكار بالذكاء الاصطناعي
+
+### Phase 1: Design evaluation criteria and AI prompt engineering
+- [x] تصميم معايير التقييم الشاملة (5 محاور: فني، سوق، مالي، تنفيذ، نمو)
+- [x] إنشاء AI prompts احترافية مع system prompt متخصص
+- [x] تحديد نموذج التقييم والدرجات (من 100 لكل محور)
+- [x] تصميم هيكل JSON schema للنتائج المنظمة
+
+### Phase 2: Build backend tRPC procedures for AI evaluation
+- [x] تحديث ideas router بنظام التقييم المحسّن
+- [x] إضافة targetMarket و competitiveAdvantage للـ schema
+- [x] تطبيق schema changes على Neon database
+- [x] تحديث evaluate procedure لاستخدام AI prompts الجديدة
+- [x] إضافة error handling شامل
+
+### Phase 3: Create idea submission form with rich input fields
+- [x] تصميم صفحة إرسال الفكرة (/ideas/submit)
+- [x] إنشاء form fields شاملة (9 حقول متنوعة)
+- [x] إضافة validation للحقول المطلوبة
+- [x] ربط الـ form بـ tRPC procedures (create + evaluate)
+- [x] إضافة loading states و error handling شامل
+- [x] إضافة route في App.tsx
+- [### Phase 4: Build evaluation results dashboard with visualizations
+- [x] إعادة كتابة IdeaDetails.tsx بالكامل
+- [x] ربط مع real API data بدلاً من mock data
+- [x] إضافة progress bar للدرجة الإجمالية (circular + linear)
+- [x] عرض نقاط القوة والضعف والمخاطر (3 cards)
+- [x] عرض التقييم التفصيلي للمحاور الـ 5
+- [x] عرض التوصيات والخطوات التالية
+- [x] إضافة CTA لتحويل الفكرة إلى مشروعذ
+
+### Phase 5: Implement idea-to-project conversion workflow
+- [x] زر "إنشاء مشروع" موجود في IdeaDetails.tsx
+- [x] Workflow يربط مع /projects/new?ideaId={id}
+- [x] convertedToProject flag موجود في schem### Phase 6: Test complete evaluation flow and save checkpoint
+- [x] فحص حالة المشروع - كل شيء يعمل
+- [x] التأكد من 0 TypeScript errors
+- [x] التأكد من Dev server يعمل
+- [x] التأكد من UI يعرض بشكل صحيح
+- [ ] حفظ checkpoint نهائي

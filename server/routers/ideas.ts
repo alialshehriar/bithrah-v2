@@ -2,6 +2,13 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { invokeLLM } from "../_core/llm";
+import {
+  SYSTEM_PROMPT,
+  buildEvaluationPrompt,
+  EVALUATION_SCHEMA,
+  type IdeaInput,
+  type EvaluationResult,
+} from "../ai-evaluation-prompts";
 
 export const ideasRouter = router({
   // Create new idea
@@ -15,6 +22,8 @@ export const ideasRouter = router({
         stage: z.string().optional(),
         technicalNeeds: z.string().optional(),
         financialNeeds: z.string().optional(),
+        targetMarket: z.string().optional(),
+        competitiveAdvantage: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -32,7 +41,7 @@ export const ideasRouter = router({
       return idea;
     }),
 
-  // Evaluate idea with AI
+  // Evaluate idea with AI - Enhanced version
   evaluate: protectedProcedure
     .input(z.object({ ideaId: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -50,109 +59,56 @@ export const ideasRouter = router({
       await db.updateIdea(input.ideaId, { evaluationStatus: "processing" });
 
       try {
-        // Call AI for evaluation
-        const prompt = `أنت خبير في تقييم الأفكار والمشاريع الناشئة. قم بتقييم الفكرة التالية بشكل شامل ومفصل:
+        // Prepare idea input for evaluation
+        const ideaInput: IdeaInput = {
+          ideaName: idea.ideaName,
+          ideaDescription: idea.ideaDescription,
+          sector: idea.sector || undefined,
+          category: idea.category || undefined,
+          stage: idea.stage || undefined,
+          technicalNeeds: idea.technicalNeeds || undefined,
+          financialNeeds: idea.financialNeeds || undefined,
+          targetMarket: idea.targetMarket || undefined,
+          competitiveAdvantage: idea.competitiveAdvantage || undefined,
+        };
 
-**اسم الفكرة:** ${idea.ideaName}
+        // Build evaluation prompt
+        const evaluationPrompt = buildEvaluationPrompt(ideaInput);
 
-**وصف الفكرة:** ${idea.ideaDescription}
-
-**القطاع:** ${idea.sector || "غير محدد"}
-
-**الفئة:** ${idea.category || "غير محدد"}
-
-**المرحلة:** ${idea.stage || "غير محدد"}
-
-**الاحتياجات التقنية:** ${idea.technicalNeeds || "غير محدد"}
-
-**الاحتياجات المالية:** ${idea.financialNeeds || "غير محدد"}
-
-قدم تقييماً شاملاً يتضمن:
-1. ملخص الفكرة (2-3 جمل)
-2. نقاط القوة (3-5 نقاط)
-3. نقاط الضعف (3-5 نقاط)
-4. المخاطر المحتملة (3-5 مخاطر)
-5. رأي مبدئي في جدوى الفكرة
-6. التحليل الاستراتيجي
-7. التحليل المالي
-8. تحليل السوق
-9. تحليل التنفيذ
-10. استراتيجية النمو
-11. تقييم عام من 10
-
-قدم الإجابة بصيغة JSON بالشكل التالي:
-{
-  "summary": "ملخص الفكرة",
-  "strengths": "نقاط القوة",
-  "weaknesses": "نقاط الضعف",
-  "risks": "المخاطر",
-  "feasibility": "رأي مبدئي في الجدوى",
-  "strategicAnalysis": "التحليل الاستراتيجي",
-  "financialAnalysis": "التحليل المالي",
-  "marketAnalysis": "تحليل السوق",
-  "executionAnalysis": "تحليل التنفيذ",
-  "growthStrategy": "استراتيجية النمو",
-  "overallScore": 8.5
-}`;
-
+        // Call AI for comprehensive evaluation
         const response = await invokeLLM({
           messages: [
-            {
-              role: "system",
-              content: "أنت خبير في تقييم الأفكار والمشاريع الناشئة. قدم تقييمات شاملة ومفصلة.",
-            },
-            { role: "user", content: prompt },
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: evaluationPrompt },
           ],
           response_format: {
             type: "json_schema",
             json_schema: {
               name: "idea_evaluation",
               strict: true,
-              schema: {
-                type: "object",
-                properties: {
-                  summary: { type: "string" },
-                  strengths: { type: "string" },
-                  weaknesses: { type: "string" },
-                  risks: { type: "string" },
-                  feasibility: { type: "string" },
-                  strategicAnalysis: { type: "string" },
-                  financialAnalysis: { type: "string" },
-                  marketAnalysis: { type: "string" },
-                  executionAnalysis: { type: "string" },
-                  growthStrategy: { type: "string" },
-                  overallScore: { type: "number" },
-                },
-                required: [
-                  "summary",
-                  "strengths",
-                  "weaknesses",
-                  "risks",
-                  "feasibility",
-                  "strategicAnalysis",
-                  "financialAnalysis",
-                  "marketAnalysis",
-                  "executionAnalysis",
-                  "growthStrategy",
-                  "overallScore",
-                ],
-                additionalProperties: false,
-              },
+              schema: EVALUATION_SCHEMA,
             },
           },
         });
 
         const content = response.choices[0].message.content;
-        const evaluation = JSON.parse(typeof content === "string" ? content : "{}");
+        const evaluation: EvaluationResult = JSON.parse(
+          typeof content === "string" ? content : "{}"
+        );
+
+        // Convert arrays to strings for database storage
+        const strengthsText = evaluation.strengths.join("\n• ");
+        const weaknessesText = evaluation.weaknesses.join("\n• ");
+        const risksText = evaluation.risks.join("\n• ");
 
         // Update idea with evaluation results
         const updatedIdea = await db.updateIdea(input.ideaId, {
           evaluationStatus: "completed",
-          evaluationSummary: evaluation.summary,
-          strengths: evaluation.strengths,
-          weaknesses: evaluation.weaknesses,
-          risks: evaluation.risks,
-          feasibilityOpinion: evaluation.feasibility,
+          evaluationSummary: evaluation.evaluationSummary,
+          strengths: strengthsText,
+          weaknesses: weaknessesText,
+          risks: risksText,
+          feasibilityOpinion: evaluation.feasibilityOpinion,
           strategicAnalysis: evaluation.strategicAnalysis,
           financialAnalysis: evaluation.financialAnalysis,
           marketAnalysis: evaluation.marketAnalysis,
@@ -162,7 +118,17 @@ export const ideasRouter = router({
           evaluatedAt: new Date(),
         });
 
-        return updatedIdea;
+        return {
+          ...updatedIdea,
+          scores: {
+            overall: evaluation.overallScore,
+            feasibility: evaluation.feasibilityScore,
+            market: evaluation.marketScore,
+            financial: evaluation.financialScore,
+            execution: evaluation.executionScore,
+            growth: evaluation.growthScore,
+          },
+        };
       } catch (error) {
         console.error("AI Evaluation failed:", error);
         await db.updateIdea(input.ideaId, { evaluationStatus: "failed" });
@@ -176,19 +142,21 @@ export const ideasRouter = router({
   }),
 
   // Get idea by ID
-  getById: protectedProcedure.input(z.object({ ideaId: z.number() })).query(async ({ ctx, input }) => {
-    const idea = await db.getIdeaById(input.ideaId);
+  getById: protectedProcedure
+    .input(z.object({ ideaId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const idea = await db.getIdeaById(input.ideaId);
 
-    if (!idea) {
-      throw new Error("Idea not found");
-    }
+      if (!idea) {
+        throw new Error("Idea not found");
+      }
 
-    if (idea.userId !== ctx.user.id) {
-      throw new Error("Unauthorized");
-    }
+      if (idea.userId !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
 
-    return idea;
-  }),
+      return idea;
+    }),
 
   // Update idea
   update: protectedProcedure
@@ -202,6 +170,8 @@ export const ideasRouter = router({
         stage: z.string().optional(),
         technicalNeeds: z.string().optional(),
         financialNeeds: z.string().optional(),
+        targetMarket: z.string().optional(),
+        competitiveAdvantage: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -252,6 +222,11 @@ export const ideasRouter = router({
 
       if (idea.convertedToProject) {
         throw new Error("Idea already converted to project");
+      }
+
+      // Only allow conversion if evaluation is completed
+      if (idea.evaluationStatus !== "completed") {
+        throw new Error("Idea must be evaluated before conversion to project");
       }
 
       // Generate unique slug

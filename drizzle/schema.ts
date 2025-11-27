@@ -132,6 +132,8 @@ export const ideas = pgTable(
     stage: text("stage"),
     technicalNeeds: text("technicalNeeds"),
     financialNeeds: text("financialNeeds"),
+    targetMarket: text("targetMarket"),
+    competitiveAdvantage: text("competitiveAdvantage"),
 
     // AI Evaluation Results
     evaluationStatus: evaluationStatusEnum("evaluationStatus").default("pending").notNull(),
