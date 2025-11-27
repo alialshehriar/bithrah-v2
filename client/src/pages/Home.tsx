@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import WelcomePopup from "@/components/WelcomePopup";
 import {
   Sparkles,
   Target,
@@ -25,6 +27,20 @@ import {
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    // Show welcome popup for first-time visitors
+    const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem("hasSeenWelcome", "true");
+  };
 
   const features = [
     {
@@ -452,6 +468,9 @@ export default function Home() {
       </section>
 
       <Footer />
+      
+      {/* Welcome Popup */}
+      <WelcomePopup open={showWelcome} onClose={handleCloseWelcome} />
     </div>
   );
 }

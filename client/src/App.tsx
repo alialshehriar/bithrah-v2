@@ -24,6 +24,8 @@ import Contact from "./pages/static/Contact";
 import FAQ from "./pages/static/FAQ";
 import Terms from "./pages/static/Terms";
 import Privacy from "./pages/static/Privacy";
+import Wallet from "./pages/Wallet";
+import Leaderboard from "./pages/Leaderboard";
 
 function Router() {
   return (
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/projects" component={Projects} />
       <Route path="/community" component={Community} />
       <Route path="/negotiations" component={Negotiations} />
+      <Route path="/wallet" component={Wallet} />
+      <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/marketer" component={MarketerDashboard} />
       <Route path="/early-access" component={EarlyAccess} />
       <Route path="/admin" component={AdminDashboard} />
