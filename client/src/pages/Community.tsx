@@ -248,24 +248,7 @@ export default function Community() {
           <div className="grid lg:grid-cols-12 gap-6">
             {/* Left Sidebar */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Quick Stats */}
-              <Card className="p-6 space-y-4">
-                <h3 className="font-bold text-lg">إحصائيات المجتمع</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">الأعضاء</span>
-                    <span className="font-bold text-primary">10,234</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">المنشورات</span>
-                    <span className="font-bold text-primary">45,678</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">المشاريع</span>
-                    <span className="font-bold text-primary">1,234</span>
-                  </div>
-                </div>
-              </Card>
+              {/* Quick Stats - Removed fake numbers */}
 
               {/* Trending Topics */}
               <Card className="p-6 space-y-4">
