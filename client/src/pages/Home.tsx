@@ -359,7 +359,7 @@ export default function Home() {
                         نمو مستمر
                       </h3>
                       <p className="text-gray-600">
-                        انضم لآلاف رواد الأعمال الناجحين
+                        انضم إلى رواد الأعمال الناجحين
                       </p>
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function Home() {
               جاهز لتحويل فكرتك إلى واقع؟
             </h2>
             <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-              انضم لآلاف رواد الأعمال الذين حولوا أفكارهم إلى مشاريع ناجحة على بذرة
+              انضم إلى رواد الأعمال الذين يحولون أفكارهم إلى مشاريع ناجحة على بذرة
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button

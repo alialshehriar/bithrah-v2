@@ -23,8 +23,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import About from "./pages/static/About";
 import Contact from "./pages/static/Contact";
-import FAQ from "./pages/static/FAQ";
-import Terms from "./pages/static/Terms";
+import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
+import IPProtection from "./pages/IPProtection";
 import Privacy from "./pages/static/Privacy";
 import Wallet from "./pages/Wallet";
 import Leaderboard from "./pages/Leaderboard";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/faq" component={FAQ} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/ip-protection" component={IPProtection} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -37,8 +37,8 @@ export default function Footer() {
       links: [
         { label: "الشروط والأحكام", href: "/terms" },
         { label: "سياسة الخصوصية", href: "/privacy" },
-        { label: "سياسة الاسترجاع", href: "/refund" },
-        { label: "اتفاقية المستخدم", href: "/user-agreement" },
+        { label: "حماية الملكية الفكرية", href: "/ip-protection" },
+        { label: "الأسئلة الشائعة", href: "/faq" },
       ],
     },
   ];
