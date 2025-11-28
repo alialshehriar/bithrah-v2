@@ -28,17 +28,13 @@ import Terms from "./pages/static/Terms";
 import Privacy from "./pages/static/Privacy";
 import Wallet from "./pages/Wallet";
 import Leaderboard from "./pages/Leaderboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-       <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/settings" component={Settings} />
+      <Route path={"/profile"} component={Profile} />
+      <Route path={"/settings"} component={Settings} />
         <Route path="/ideas/new" component={NewIdea} />
       <Route path="/ideas/submit" component={SubmitIdea} />
       <Route path="/investors/dashboard" component={InvestorDashboard} />
