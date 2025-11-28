@@ -89,4 +89,9 @@ export const usersRouter = router({
   getStatistics: publicProcedure.query(async () => {
     return db.getStatistics();
   }),
+
+  // Get user stats (ideas, projects, followers, points)
+  getStats: protectedProcedure.query(async ({ ctx }) => {
+    return db.getUserStats(ctx.user.id);
+  }),
 });

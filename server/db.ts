@@ -1084,3 +1084,43 @@ export async function getEvaluationStats() {
     averageScore: avgScore?.avg ? parseFloat(avgScore.avg.toFixed(1)) : 0,
   };
 }
+
+
+// Get user stats (ideas, projects, followers, points)
+export async function getUserStats(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not initialized");
+
+  // Count ideas
+  const ideasResult = await db
+    .select({ count: sql`count(*)`.mapWith(Number) })
+    .from(ideas)
+    .where(eq(ideas.userId, userId));
+  const ideasCount = ideasResult[0]?.count || 0;
+
+  // Count projects
+  const projectsResult = await db
+    .select({ count: sql`count(*)`.mapWith(Number) })
+    .from(projects)
+    .where(eq(projects.userId, userId));
+  const projectsCount = projectsResult[0]?.count || 0;
+
+  // Count followers (assuming you have a followers table)
+  // For now, return 0
+  const followersCount = 0;
+
+  // Get points from user_wallets
+  const wallet = await db
+    .select()
+    .from(userWallets)
+    .where(eq(userWallets.userId, userId))
+    .limit(1);
+  const points = parseFloat(wallet[0]?.availableBalance || '0');
+
+  return {
+    ideasCount,
+    projectsCount,
+    followersCount,
+    points,
+  };
+}

@@ -51,11 +51,14 @@ export default function Profile() {
     );
   }
 
+  // Fetch real user stats from API
+  const { data: userStats } = trpc.users.getStats.useQuery();
+
   const stats = [
-    { label: "الأفكار", value: "12", icon: Lightbulb, color: "text-yellow-500" },
-    { label: "المشاريع", value: "5", icon: FolderKanban, color: "text-blue-500" },
-    { label: "المتابعون", value: "234", icon: Users, color: "text-purple-500" },
-    { label: "النقاط", value: "1,250", icon: Trophy, color: "text-orange-500" },
+    { label: "الأفكار", value: userStats?.ideasCount?.toString() || "0", icon: Lightbulb, color: "text-yellow-500" },
+    { label: "المشاريع", value: userStats?.projectsCount?.toString() || "0", icon: FolderKanban, color: "text-blue-500" },
+    { label: "المتابعون", value: userStats?.followersCount?.toString() || "0", icon: Users, color: "text-purple-500" },
+    { label: "النقاط", value: userStats?.points?.toString() || "0", icon: Trophy, color: "text-orange-500" },
   ];
 
   const achievements = [

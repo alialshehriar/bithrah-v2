@@ -367,29 +367,7 @@ export default function Home() {
               </div>
 
               {/* Floating Cards */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg p-4 animate-pulse">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold">95%</div>
-                    <div className="text-xs text-gray-500">نسبة النجاح</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4 animate-pulse" style={{ animationDelay: '1s' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold">10K+</div>
-                    <div className="text-xs text-gray-500">مستخدم نشط</div>
-                  </div>
-                </div>
-              </div>
+              {/* Fake stats removed - will be replaced with real data */}
             </div>
           </div>
         </div>
