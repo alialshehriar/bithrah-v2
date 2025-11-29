@@ -180,4 +180,13 @@ export const authRouter = router({
         },
       };
     }),
+
+  me: publicProcedure.query(({ ctx }) => ctx.user),
+
+  logout: publicProcedure.mutation(() => {
+    return {
+      success: true,
+      message: 'تم تسجيل الخروج بنجاح',
+    };
+  }),
 });

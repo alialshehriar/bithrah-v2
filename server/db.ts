@@ -10,7 +10,7 @@ import {
   projectBackings,
   negotiations,
   negotiationMessages,
-  referrals,
+  projectReferrals,
   commissions,
   communityPosts,
   communityComments,
@@ -475,12 +475,12 @@ export async function createNegotiationMessage(message: typeof negotiationMessag
 // REFERRAL & COMMISSION HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export async function createReferral(referral: typeof referrals.$inferInsert) {
+export async function createReferral(referral: typeof projectReferrals.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const now = new Date();
-  const [result] = await db.insert(referrals).values({
+  const [result] = await db.insert(projectReferrals).values({
     ...referral,
     createdAt: now,
     updatedAt: now,
@@ -495,8 +495,8 @@ export async function getReferralByCode(referralCode: string) {
 
   const result = await db
     .select()
-    .from(referrals)
-    .where(eq(referrals.referralCode, referralCode))
+    .from(projectReferrals)
+    .where(eq(projectReferrals.referralCode, referralCode))
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -507,19 +507,19 @@ export async function getReferralsByUser(userId: number) {
 
   return db
     .select()
-    .from(referrals)
-    .where(eq(referrals.referrerUserId, userId))
-    .orderBy(desc(referrals.createdAt));
+    .from(projectReferrals)
+    .where(eq(projectReferrals.referrerUserId, userId))
+    .orderBy(desc(projectReferrals.createdAt));
 }
 
-export async function updateReferral(referralId: number, updates: Partial<typeof referrals.$inferInsert>) {
+export async function updateReferral(referralId: number, updates: Partial<typeof projectReferrals.$inferInsert>) {
   const db = await getDb();
   if (!db) return undefined;
 
   await db
-    .update(referrals)
+    .update(projectReferrals)
     .set({ ...updates, updatedAt: new Date() })
-    .where(eq(referrals.id, referralId));
+    .where(eq(projectReferrals.id, referralId));
 }
 
 export async function createCommission(commission: typeof commissions.$inferInsert) {

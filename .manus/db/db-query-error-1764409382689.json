@@ -1,0 +1,19 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS \"earlyAccessUsers\" (\n  \"id\" serial PRIMARY KEY NOT NULL,\n  \"fullName\" text NOT NULL,\n  \"email\" text NOT NULL,\n  \"phone\" text,\n  \"username\" text NOT NULL,\n  \"source\" text NOT NULL,\n  \"referralCode\" text NOT NULL,\n  \"referredBy\" text,\n  \"referralCount\" integer DEFAULT 0 NOT NULL,\n  \"bonusYears\" integer DEFAULT 1 NOT NULL,\n  \"createdAt\" timestamp DEFAULT now() NOT NULL,\n  CONSTRAINT \"earlyAccessUsers_email_unique\" UNIQUE(\"email\"),\n  CONSTRAINT \"earlyAccessUsers_username_unique\" UNIQUE(\"username\"),\n  CONSTRAINT \"earlyAccessUsers_referralCode_unique\" UNIQUE(\"referralCode\")\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute CREATE TABLE IF NOT EXISTS \"earlyAccessUsers\" (\n  \"id\" serial PRIMARY KEY NOT NULL,\n  \"fullName\" text NOT NULL,\n  \"email\" text NOT NULL,\n  \"phone\" text,\n  \"username\" text NOT NULL,\n  \"source\" text NOT NULL,\n  \"referralCode\" text NOT NULL,\n  \"referredBy\" text,\n  \"referralCount\" integer DEFAULT 0 NOT NULL,\n  \"bonusYears\" integer DEFAULT 1 NOT NULL,\n  \"createdAt\" timestamp DEFAULT now() NOT NULL,\n  CONSTRAINT \"earlyAccessUsers_email_unique\" UNIQUE(\"email\"),\n  CONSTRAINT \"earlyAccessUsers_username_unique\" UNIQUE(\"username\"),\n  CONSTRAINT \"earlyAccessUsers_referralCode_unique\" UNIQUE(\"referralCode\")\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 45 near \"\"earlyAccessUsers\" (",
+    "  \"id\" serial PRIMARY KEY NOT NULL,",
+    "  \"fullName\" text NOT NULL,",
+    "  \"email\" text NOT NULL,",
+    "  \"phone\" text,",
+    "  \"username\" text NOT NULL,",
+    "  \"source\" text NOT NULL,",
+    "  \"referralCode\" text NOT NULL,",
+    "  \"referredBy\" text,",
+    "  \"referralCount\" integer DEFAULT 0 NOT NULL,",
+    "  \"bonusYears\" integer DEFAULT 1 NOT NULL,",
+    "  \"createdAt\" timestamp DEFAULT now() NOT NUL"
+  ]
+}

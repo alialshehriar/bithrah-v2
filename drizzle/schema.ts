@@ -405,7 +405,7 @@ export const negotiationMessages = pgTable("negotiationMessages", {
 // REFERRALS & COMMISSIONS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const referrals = pgTable("referrals", {
+export const projectReferrals = pgTable("projectReferrals", {
   id: serial("id").primaryKey(),
   referrerUserId: integer("referrerUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
   projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
@@ -428,7 +428,7 @@ export const referrals = pgTable("referrals", {
 
 export const referralClicks = pgTable("referralClicks", {
   id: serial("id").primaryKey(),
-  referralId: integer("referralId").notNull().references(() => referrals.id, { onDelete: "cascade" }),
+  referralId: integer("referralId").notNull().references(() => projectReferrals.id, { onDelete: "cascade" }),
   ipAddress: text("ipAddress"),
   userAgent: text("userAgent"),
   clickedAt: timestamp("clickedAt").notNull(),
@@ -439,7 +439,7 @@ export const commissions = pgTable("commissions", {
   userId: integer("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   projectId: integer("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
   negotiationId: integer("negotiationId").references(() => negotiations.id, { onDelete: "set null" }),
-  referralId: integer("referralId").references(() => referrals.id, { onDelete: "set null" }),
+  referralId: integer("referralId").references(() => projectReferrals.id, { onDelete: "set null" }),
 
   // Commission Details
   commissionType: commissionTypeEnum("commissionType").notNull(),
@@ -794,6 +794,48 @@ export const notifications = pgTable(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// EARLY ACCESS & REFERRALS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const earlyAccessUsers = pgTable(
+  "earlyAccessUsers",
+  {
+    id: serial("id").primaryKey(),
+    fullName: text("fullName").notNull(),
+    email: text("email").notNull().unique(),
+    phone: text("phone"),
+    username: text("username").notNull().unique(),
+    source: text("source").notNull(), // من أين عرف عن بذره
+    referralCode: text("referralCode").notNull().unique(), // كود الإحالة الخاص به
+    referredBy: text("referredBy"), // كود الإحالة الذي استخدمه للتسجيل
+    referralCount: integer("referralCount").default(0).notNull(), // عدد الإحالات الناجحة
+    bonusYears: integer("bonusYears").default(1).notNull(), // سنوات الاشتراك المجاني (1 + عدد الإحالات)
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    emailIdx: uniqueIndex("early_access_email_idx").on(table.email),
+    usernameIdx: uniqueIndex("early_access_username_idx").on(table.username),
+    referralCodeIdx: uniqueIndex("early_access_referral_code_idx").on(table.referralCode),
+    referredByIdx: index("early_access_referred_by_idx").on(table.referredBy),
+  })
+);
+
+export const earlyAccessReferrals = pgTable(
+  "earlyAccessReferrals",
+  {
+    id: serial("id").primaryKey(),
+    referrerId: integer("referrerId").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
+    referredId: integer("referredId").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
+    referralCode: text("referralCode").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    referrerIdIdx: index("early_access_referrals_referrer_id_idx").on(table.referrerId),
+    referredIdIdx: index("early_access_referrals_referred_id_idx").on(table.referredId),
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // TYPE EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -811,3 +853,9 @@ export type InsertCommunityPost = typeof communityPosts.$inferInsert;
 
 export type Negotiation = typeof negotiations.$inferSelect;
 export type InsertNegotiation = typeof negotiations.$inferInsert;
+
+export type EarlyAccessUser = typeof earlyAccessUsers.$inferSelect;
+export type InsertEarlyAccessUser = typeof earlyAccessUsers.$inferInsert;
+
+export type EarlyAccessReferral = typeof earlyAccessReferrals.$inferSelect;
+export type InsertEarlyAccessReferral = typeof earlyAccessReferrals.$inferInsert;
