@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -20,8 +21,12 @@ import {
   Mail,
   User,
   Phone,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function EarlyAccess() {
   const [selectedTab, setSelectedTab] = useState("register");
@@ -29,88 +34,17 @@ export default function EarlyAccess() {
     name: "",
     email: "",
     phone: "",
+    username: "",
+    howDidYouHear: "",
+    referralCode: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ideaText, setIdeaText] = useState("");
 
-  // TODO: Replace with real data from trpc.users.getLeaderboard.useQuery()
-  const leaderboard = [
-    {
-      rank: 1,
-      name: "أحمد محمد",
-      batch: "الدفعة الأولى",
-      referrals: 45,
-      points: 2250,
-      badge: "ذهبي",
-      avatar: null,
-    },
-    {
-      rank: 2,
-      name: "فاطمة علي",
-      batch: "الدفعة الأولى",
-      referrals: 38,
-      points: 1900,
-      badge: "فضي",
-      avatar: null,
-    },
-    {
-      rank: 3,
-      name: "خالد سعد",
-      batch: "الدفعة الأولى",
-      referrals: 32,
-      points: 1600,
-      badge: "برونزي",
-      avatar: null,
-    },
-    {
-      rank: 4,
-      name: "سارة أحمد",
-      batch: "الدفعة الثانية",
-      referrals: 28,
-      points: 1400,
-      badge: null,
-      avatar: null,
-    },
-    {
-      rank: 5,
-      name: "محمد علي",
-      batch: "الدفعة الثانية",
-      referrals: 25,
-      points: 1250,
-      badge: null,
-      avatar: null,
-    },
-  ];
-
-  const stats = [
-    {
-      label: "المسجلون",
-      value: "2,450",
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-    {
-      label: "الدفعات",
-      value: "5",
-      icon: Trophy,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
-    {
-      label: "الإحالات",
-      value: "5,890",
-      icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
-      label: "النقاط",
-      value: "125K",
-      icon: Star,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-    },
-  ];
+  // tRPC queries
+  const { data: stats, isLoading: statsLoading } = trpc.earlyAccess.getStats.useQuery();
+  const { data: leaderboard, isLoading: leaderboardLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
+  const registerMutation = trpc.earlyAccess.register.useMutation();
+  const evaluateMutation = trpc.ideas.evaluate.useMutation();
 
   const benefits = [
     {
@@ -162,26 +96,91 @@ export default function EarlyAccess() {
   };
 
   const getBadgeColor = (badge: string | null) => {
-    if (!badge) return null;
-    const colors = {
+    if (!badge) return undefined;
+    const colors: Record<string, string> = {
       "ذهبي": "bg-yellow-100 text-yellow-800",
       "فضي": "bg-gray-100 text-gray-800",
       "برونزي": "bg-orange-100 text-orange-800",
     };
-    return colors[badge as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[badge] || "bg-gray-100 text-gray-800";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // TODO: Replace with trpc.users.registerEarlyAccess.useMutation()
-    setTimeout(() => {
-      toast.success("تم التسجيل بنجاح! سنتواصل معك قريباً.");
-      setFormData({ name: "", email: "", phone: "" });
-      setIsSubmitting(false);
-    }, 1500);
+    try {
+      await registerMutation.mutateAsync({
+        fullName: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        username: formData.username,
+        source: formData.howDidYouHear,
+        referralCode: formData.referralCode || undefined,
+      });
+
+      toast.success("تم التسجيل بنجاح! تحقق من بريدك الإلكتروني لتفعيل حسابك.");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        username: "",
+        howDidYouHear: "",
+        referralCode: "",
+      });
+    } catch (error: any) {
+      toast.error(error.message || "حدث خطأ أثناء التسجيل");
+    }
   };
+
+  const handleEvaluateIdea = async () => {
+    if (!ideaText.trim()) {
+      toast.error("الرجاء كتابة فكرتك");
+      return;
+    }
+
+    try {
+      const result = await evaluateMutation.mutateAsync({
+        ideaId: 0, // Temporary ID for evaluation
+      });
+
+      toast.success("تم تقييم فكرتك بنجاح!");
+      // Show evaluation result in a modal or redirect
+      console.log("Evaluation result:", result);
+    } catch (error: any) {
+      toast.error(error.message || "حدث خطأ أثناء التقييم");
+    }
+  };
+
+  const statsData = [
+    {
+      label: "المسجلون",
+      value: statsLoading ? "..." : (stats?.totalUsers || 0).toString(),
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    {
+      label: "الدفعات",
+      value: statsLoading ? "..." : "1",
+      icon: Trophy,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+    },
+    {
+      label: "الإحالات",
+      value: statsLoading ? "..." : (stats?.totalReferrals || 0).toString(),
+      icon: TrendingUp,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    {
+      label: "النقاط",
+      value: statsLoading ? "..." : ((stats?.totalReferrals || 0) * 50).toString(),
+      icon: Star,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+    },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -229,7 +228,7 @@ export default function EarlyAccess() {
         <section className="py-8 bg-white border-b">
           <div className="container">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
+              {statsData.map((stat, index) => (
                 <Card key={index} className="p-6">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-lg ${stat.bgColor}`}>
@@ -271,7 +270,7 @@ export default function EarlyAccess() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium mb-2">
-                          الاسم الكامل
+                          الاسم الكامل *
                         </label>
                         <div className="relative">
                           <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -290,7 +289,29 @@ export default function EarlyAccess() {
 
                       <div>
                         <label className="block text-sm font-medium mb-2">
-                          البريد الإلكتروني
+                          اسم المستخدم (يوزر) *
+                        </label>
+                        <div className="relative">
+                          <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                          <Input
+                            type="text"
+                            placeholder="username"
+                            value={formData.username}
+                            onChange={(e) =>
+                              setFormData({ ...formData, username: e.target.value })
+                            }
+                            required
+                            className="pr-10"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          اسم فريد سيظهر في ملفك الشخصي
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          البريد الإلكتروني *
                         </label>
                         <div className="relative">
                           <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -325,13 +346,53 @@ export default function EarlyAccess() {
                         </div>
                       </div>
 
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          كيف سمعت عن بذره؟ *
+                        </label>
+                        <Select
+                          value={formData.howDidYouHear}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, howDidYouHear: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="social_media">وسائل التواصل الاجتماعي</SelectItem>
+                            <SelectItem value="friend">صديق أو معرفة</SelectItem>
+                            <SelectItem value="search">محرك بحث</SelectItem>
+                            <SelectItem value="ad">إعلان</SelectItem>
+                            <SelectItem value="other">أخرى</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          كود الإحالة (اختياري)
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="أدخل كود الإحالة إن وجد"
+                          value={formData.referralCode}
+                          onChange={(e) =>
+                            setFormData({ ...formData, referralCode: e.target.value })
+                          }
+                        />
+                      </div>
+
                       <Button
                         type="submit"
                         className="w-full gradient-bg text-lg py-6"
-                        disabled={isSubmitting}
+                        disabled={registerMutation.isPending}
                       >
-                        {isSubmitting ? (
-                          "جاري التسجيل..."
+                        {registerMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                            جاري التسجيل...
+                          </>
                         ) : (
                           <>
                             <CheckCircle className="w-5 h-5 ml-2" />
@@ -375,166 +436,124 @@ export default function EarlyAccess() {
                         ))}
                       </div>
                     </Card>
-
-                    <Card className="p-8">
-                      <h3 className="text-xl font-bold mb-4">
-                        نظام الدفعات
-                      </h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                          <div>
-                            <p className="font-bold text-green-800">الدفعة الأولى</p>
-                            <p className="text-sm text-green-600">مغلقة</p>
-                          </div>
-                          <Badge className="bg-green-600 text-white">500 عضو</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                          <div>
-                            <p className="font-bold text-blue-800">الدفعة الثانية</p>
-                            <p className="text-sm text-blue-600">مفتوحة الآن</p>
-                          </div>
-                          <Badge className="bg-blue-600 text-white">350/500</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-bold text-gray-800">الدفعة الثالثة</p>
-                            <p className="text-sm text-gray-600">قريباً</p>
-                          </div>
-                          <Badge className="bg-gray-400 text-white">0/500</Badge>
-                        </div>
-                      </div>
-                    </Card>
                   </div>
                 </div>
               </TabsContent>
 
               {/* Evaluate Tab */}
               <TabsContent value="evaluate">
-                <Card className="p-8 max-w-3xl mx-auto">
-                  <div className="mb-6">
-                    <h2 className="text-3xl font-bold mb-2">قيّم فكرتك</h2>
-                    <p className="text-gray-600">
-                      اكتب فكرتك وسنقيّمها باستخدام الذكاء الاصطناعي
-                    </p>
-                  </div>
-
-                  <form className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        وصف الفكرة
-                      </label>
-                      <textarea
-                        className="w-full min-h-[200px] p-4 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="اكتب فكرتك بالتفصيل..."
-                      />
+                <div className="max-w-3xl mx-auto">
+                  <Card className="p-8">
+                    <div className="mb-6">
+                      <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                        <Sparkles className="w-8 h-8 text-yellow-500" />
+                        قيّم فكرتك بالذكاء الاصطناعي
+                      </h2>
+                      <p className="text-gray-600">
+                        اكتب فكرتك وسنقوم بتقييمها باستخدام الذكاء الاصطناعي
+                      </p>
                     </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full gradient-bg text-lg py-6"
-                    >
-                      قيّم فكرتي
-                    </Button>
-                  </form>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          وصف الفكرة
+                        </label>
+                        <Textarea
+                          placeholder="اكتب فكرتك بالتفصيل..."
+                          value={ideaText}
+                          onChange={(e) => setIdeaText(e.target.value)}
+                          rows={10}
+                          className="resize-none"
+                        />
+                      </div>
 
-                  <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-                    <h3 className="font-bold text-lg mb-2">ماذا ستحصل عليه؟</h3>
-                    <ul className="space-y-2 text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                        <span>تقييم شامل لفكرتك</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                        <span>نقاط القوة والضعف</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                        <span>اقتراحات للتحسين</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                        <span>درجة من 10 لجاذبية الفكرة</span>
-                      </li>
-                    </ul>
-                  </div>
-                </Card>
+                      <Button
+                        onClick={handleEvaluateIdea}
+                        className="w-full gradient-bg text-lg py-6"
+                        disabled={evaluateMutation.isPending || !ideaText.trim()}
+                      >
+                        {evaluateMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                            جاري التقييم...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5 ml-2" />
+                            قيّم فكرتي
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
               </TabsContent>
 
               {/* Leaderboard Tab */}
               <TabsContent value="leaderboard">
-                <Card>
-                  <div className="p-6 border-b">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                      <Trophy className="w-7 h-7 text-yellow-600" />
+                <Card className="p-8">
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                      <Trophy className="w-8 h-8 text-yellow-500" />
                       لوحة الصدارة
                     </h2>
-                    <p className="text-gray-600 mt-2">
-                      أفضل المسجلين الأوائل حسب عدد الإحالات والنقاط
+                    <p className="text-gray-600">
+                      أفضل المسجلين حسب عدد الإحالات
                     </p>
                   </div>
 
-                  <div className="divide-y">
-                    {leaderboard.map((user) => (
-                      <div
-                        key={user.rank}
-                        className={`p-6 flex items-center gap-6 hover:bg-gray-50 transition-colors ${
-                          user.rank <= 3 ? "bg-gradient-to-l from-yellow-50/50" : ""
-                        }`}
-                      >
-                        {/* Rank */}
-                        <div className="w-20 text-center">
-                          {getRankBadge(user.rank)}
-                        </div>
-
-                        {/* Avatar */}
-                        <div className="w-16 h-16 rounded-full bg-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
-                          {user.name.charAt(0)}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold">{user.name}</h3>
+                  {leaderboardLoading ? (
+                    <div className="flex justify-center items-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : !leaderboard || leaderboard.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">لا توجد بيانات بعد</p>
+                      <p className="text-sm text-gray-400 mt-2">
+                        كن أول من يسجل ويحصل على إحالات!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {leaderboard.map((user: any) => (
+                        <div
+                          key={user.rank}
+                          className="flex items-center justify-between p-4 rounded-lg border hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 text-center">
+                              {getRankBadge(user.rank)}
+                            </div>
+                            <div>
+                              <p className="font-bold">{user.name}</p>
+                              <p className="text-sm text-gray-600">{user.batch}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-blue-600">
+                                {user.referrals}
+                              </p>
+                              <p className="text-xs text-gray-600">إحالات</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-yellow-600">
+                                {user.points}
+                              </p>
+                              <p className="text-xs text-gray-600">نقطة</p>
+                            </div>
                             {user.badge && (
-                              <Badge className={getBadgeColor(user.badge) || "bg-gray-100 text-gray-800"}>
+                              <Badge className={getBadgeColor(user.badge)}>
                                 {user.badge}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600">{user.batch}</p>
                         </div>
-
-                        {/* Stats */}
-                        <div className="flex gap-8">
-                          <div className="text-center">
-                            <p className="text-2xl font-bold text-blue-600">
-                              {user.referrals}
-                            </p>
-                            <p className="text-xs text-gray-600">إحالة</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-bold text-yellow-600">
-                              {user.points.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-600">نقطة</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="p-6 bg-gray-50 text-center">
-                    <p className="text-gray-600 mb-4">
-                      هل تريد الظهور في لوحة الصدارة؟
-                    </p>
-                    <Button
-                      className="gradient-bg"
-                      onClick={() => setSelectedTab("register")}
-                    >
-                      سجّل الآن
-                    </Button>
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </Card>
               </TabsContent>
             </Tabs>
