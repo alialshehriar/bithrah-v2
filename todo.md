@@ -543,13 +543,14 @@
 
 ## 🔄 Phase 8: إعادة هيكلة للنشر على Vercel
 
-- [ ] إعادة هيكلة المشروع ليعمل كـ Vercel serverless
-- [ ] إنشاء api/ directory مع serverless functions
-- [ ] تحويل Express server إلى serverless handlers
-- [ ] تحديث vercel.json للإعداد الصحيح
-- [ ] إصلاح build script
-- [ ] اختبار محلي
-- [ ] النشر على Vercel
-- [ ] اختبار على bithrahapp.com
-- [ ] التحقق من عمل Popup التسجيل المبكر
-- [ ] التحقق من عمل جميع الصفحات
+- [x] إعادة هيكلة المشروع ليعمل كـ Vercel serverless
+- [x] إنشاء api/ directory مع serverless functions
+- [x] تحويل Express server إلى serverless handlers
+- [x] تحديث vercel.json للإعداد الصحيح
+- [x] إصلاح build script
+- [x] اختبار محلي
+- [x] محاولات متعددة للنشر على Vercel (فشلت بسبب architecture mismatch)
+- [ ] القرار: استخدام Manus Publish بدلاً من Vercel
+- [ ] حفظ checkpoint نهائي
+- [ ] النشر عبر Manus Publish
+- [ ] ربط bithrahapp.com من Manus dashboard
