@@ -38,7 +38,17 @@ import { Progress } from "@/components/ui/progress";
 
 export default function EarlyAccess() {
   const [, setLocation] = useLocation();
-  const [selectedTab, setSelectedTab] = useState("register");
+  
+  // Get initial tab from URL hash
+  const getInitialTab = () => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'evaluate' || hash === 'leaderboard') {
+      return hash;
+    }
+    return 'register';
+  };
+  
+  const [selectedTab, setSelectedTab] = useState(getInitialTab());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,6 +58,57 @@ export default function EarlyAccess() {
     referralCode: "",
   });
   const [ideaText, setIdeaText] = useState("");
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  console.log('Current selectedTab:', selectedTab);
+
+  // Countdown to December 31, 2025
+  useEffect(() => {
+    const calculateCountdown = () => {
+      const targetDate = new Date('2025-12-31T23:59:59').getTime();
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance > 0) {
+        setCountdown({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      }
+    };
+
+    calculateCountdown();
+    const interval = setInterval(calculateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Check for URL hash to set active tab
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      console.log('Hash changed:', hash);
+      if (hash === 'evaluate' || hash === 'leaderboard' || hash === 'register') {
+        console.log('Setting tab to:', hash);
+        setSelectedTab(hash);
+      } else if (!hash) {
+        console.log('No hash, setting to register');
+        setSelectedTab('register');
+      }
+    };
+
+    // Set initial tab from hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   // Check for referral code in URL on mount
   useEffect(() => {
@@ -231,6 +292,30 @@ export default function EarlyAccess() {
               <p className="text-xl md:text-2xl text-white/90 mb-8">
                 سجّل الآن واحصل على وصول مبكر لمنصة بذرة مع مزايا حصرية
               </p>
+              
+              {/* Countdown Timer */}
+              <div className="mb-8">
+                <p className="text-lg text-white/80 mb-4">ينتهي التسجيل المبكر في:</p>
+                <div className="flex gap-4 justify-center">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
+                    <div className="text-4xl font-bold">{countdown.days}</div>
+                    <div className="text-sm text-white/70">يوم</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
+                    <div className="text-4xl font-bold">{countdown.hours}</div>
+                    <div className="text-sm text-white/70">ساعة</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
+                    <div className="text-4xl font-bold">{countdown.minutes}</div>
+                    <div className="text-sm text-white/70">دقيقة</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
+                    <div className="text-4xl font-bold">{countdown.seconds}</div>
+                    <div className="text-sm text-white/70">ثانية</div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
@@ -278,15 +363,42 @@ export default function EarlyAccess() {
         {/* Main Content */}
         <section className="py-12">
           <div className="container">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="register">التسجيل المبكر</TabsTrigger>
-                <TabsTrigger value="evaluate">قيّم فكرتك</TabsTrigger>
-                <TabsTrigger value="leaderboard">لوحة الصدارة</TabsTrigger>
-              </TabsList>
+            <div>
+              <div className="grid w-full grid-cols-3 mb-8 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setSelectedTab('register')}
+                  className={`py-3 px-4 rounded-md font-medium transition-all ${
+                    selectedTab === 'register'
+                      ? 'bg-white shadow-sm text-purple-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  التسجيل المبكر
+                </button>
+                <button
+                  onClick={() => setSelectedTab('evaluate')}
+                  className={`py-3 px-4 rounded-md font-medium transition-all ${
+                    selectedTab === 'evaluate'
+                      ? 'bg-white shadow-sm text-purple-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  قيّم فكرتك
+                </button>
+                <button
+                  onClick={() => setSelectedTab('leaderboard')}
+                  className={`py-3 px-4 rounded-md font-medium transition-all ${
+                    selectedTab === 'leaderboard'
+                      ? 'bg-white shadow-sm text-purple-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  لوحة الصدارة
+                </button>
+              </div>
 
               {/* Register Tab */}
-              <TabsContent value="register">
+              <div className={selectedTab !== 'register' ? 'hidden' : ''}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Registration Form */}
                   <Card className="p-8">
@@ -468,10 +580,10 @@ export default function EarlyAccess() {
                     </Card>
                   </div>
                 </div>
-              </TabsContent>
+              </div>
 
               {/* Evaluate Tab */}
-              <TabsContent value="evaluate">
+              <div className={selectedTab !== 'evaluate' ? 'hidden' : ''}>
                 <div className="max-w-3xl mx-auto">
                   <Card className="p-8">
                     <div className="mb-6">
@@ -518,10 +630,10 @@ export default function EarlyAccess() {
                     </div>
                   </Card>
                 </div>
-              </TabsContent>
+              </div>
 
               {/* Leaderboard Tab */}
-              <TabsContent value="leaderboard">
+              <div className={selectedTab !== 'leaderboard' ? 'hidden' : ''}>
                 <Card className="p-8">
                   <div className="mb-8">
                     <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
@@ -585,8 +697,8 @@ export default function EarlyAccess() {
                     </div>
                   )}
                 </Card>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
         </section>
       </main>
