@@ -1,19 +1,23 @@
-// Vercel Serverless Function - Uses built files from dist/
-const path = require('path');
+// Vercel Serverless Function - ES Modules
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Import the built Express app
-const { createApp } = require(path.join(process.cwd(), 'dist', 'index.js'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let appPromise;
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Initialize app once (cached across invocations)
   if (!appPromise) {
-    appPromise = createApp();
+    // Dynamically import the built Express app
+    appPromise = import(join(__dirname, '..', 'dist', 'index.js')).then(
+      (module) => module.createApp()
+    );
   }
   
   const app = await appPromise;
   
   // Handle the request
   return app(req, res);
-};
+}
