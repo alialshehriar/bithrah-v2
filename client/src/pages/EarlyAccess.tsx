@@ -250,8 +250,9 @@ export default function EarlyAccess() {
         <section className="py-12">
           <div className="container">
             <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="register">التسجيل المبكر</TabsTrigger>
+                <TabsTrigger value="evaluate">قيّم فكرتك</TabsTrigger>
                 <TabsTrigger value="leaderboard">لوحة الصدارة</TabsTrigger>
               </TabsList>
 
@@ -405,6 +406,59 @@ export default function EarlyAccess() {
                     </Card>
                   </div>
                 </div>
+              </TabsContent>
+
+              {/* Evaluate Tab */}
+              <TabsContent value="evaluate">
+                <Card className="p-8 max-w-3xl mx-auto">
+                  <div className="mb-6">
+                    <h2 className="text-3xl font-bold mb-2">قيّم فكرتك</h2>
+                    <p className="text-gray-600">
+                      اكتب فكرتك وسنقيّمها باستخدام الذكاء الاصطناعي
+                    </p>
+                  </div>
+
+                  <form className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        وصف الفكرة
+                      </label>
+                      <textarea
+                        className="w-full min-h-[200px] p-4 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="اكتب فكرتك بالتفصيل..."
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full gradient-bg text-lg py-6"
+                    >
+                      قيّم فكرتي
+                    </Button>
+                  </form>
+
+                  <div className="mt-8 p-6 bg-blue-50 rounded-lg">
+                    <h3 className="font-bold text-lg mb-2">ماذا ستحصل عليه؟</h3>
+                    <ul className="space-y-2 text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                        <span>تقييم شامل لفكرتك</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                        <span>نقاط القوة والضعف</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                        <span>اقتراحات للتحسين</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                        <span>درجة من 10 لجاذبية الفكرة</span>
+                      </li>
+                    </ul>
+                  </div>
+                </Card>
               </TabsContent>
 
               {/* Leaderboard Tab */}
