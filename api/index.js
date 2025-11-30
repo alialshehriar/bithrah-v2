@@ -1,3 +1,6 @@
-const handler = require('../dist/index.js').default;
+// Vercel Serverless Function Entry Point
+// Import directly from TypeScript source (Vercel will transpile automatically)
 
-module.exports = handler;
+import handler from '../server/_core/index.js';
+
+export default handler;
