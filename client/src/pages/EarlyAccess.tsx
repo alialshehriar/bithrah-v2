@@ -27,6 +27,14 @@ import {
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 export default function EarlyAccess() {
   const [, setLocation] = useLocation();
@@ -63,7 +71,9 @@ export default function EarlyAccess() {
   const { data: stats, isLoading: statsLoading } = trpc.earlyAccess.getStats.useQuery();
   const { data: leaderboard, isLoading: leaderboardLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
   const registerMutation = trpc.earlyAccess.register.useMutation();
-  const evaluateMutation = trpc.ideas.evaluate.useMutation();
+  const evaluateMutation = trpc.ideas.quickEvaluate.useMutation();
+  const [evaluationResult, setEvaluationResult] = useState<any>(null);
+  const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
 
   const benefits = [
     {
@@ -159,12 +169,13 @@ export default function EarlyAccess() {
 
     try {
       const result = await evaluateMutation.mutateAsync({
-        ideaId: 0, // Temporary ID for evaluation
+        ideaName: "فكرة سريعة",
+        ideaDescription: ideaText,
       });
 
+      setEvaluationResult(result);
+      setShowEvaluationDialog(true);
       toast.success("تم تقييم فكرتك بنجاح!");
-      // Show evaluation result in a modal or redirect
-      console.log("Evaluation result:", result);
     } catch (error: any) {
       toast.error(error.message || "حدث خطأ أثناء التقييم");
     }
@@ -581,6 +592,178 @@ export default function EarlyAccess() {
       </main>
 
       <Footer />
+
+      {/* Evaluation Result Dialog */}
+      <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              نتيجة تقييم الفكرة
+            </DialogTitle>
+            <DialogDescription>
+              تقييم شامل لفكرتك باستخدام الذكاء الاصطناعي
+            </DialogDescription>
+          </DialogHeader>
+
+          {evaluationResult && (
+            <div className="space-y-6 mt-4">
+              {/* Overall Score */}
+              <div className="text-center p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                <div className="text-5xl font-bold text-primary mb-2">
+                  {evaluationResult.scores.overall}/100
+                </div>
+                <div className="text-lg text-gray-600">الدرجة الإجمالية</div>
+                <Progress value={evaluationResult.scores.overall} className="mt-4 h-3" />
+              </div>
+
+              {/* Detailed Scores */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {evaluationResult.scores.feasibility}/100
+                  </div>
+                  <div className="text-sm text-gray-600">الجدوى الفنية</div>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {evaluationResult.scores.market}/100
+                  </div>
+                  <div className="text-sm text-gray-600">تحليل السوق</div>
+                </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {evaluationResult.scores.financial}/100
+                  </div>
+                  <div className="text-sm text-gray-600">الجدوى المالية</div>
+                </div>
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {evaluationResult.scores.execution}/100
+                  </div>
+                  <div className="text-sm text-gray-600">القدرة على التنفيذ</div>
+                </div>
+                <div className="p-4 bg-pink-50 rounded-lg">
+                  <div className="text-2xl font-bold text-pink-600">
+                    {evaluationResult.scores.growth}/100
+                  </div>
+                  <div className="text-sm text-gray-600">استراتيجية النمو</div>
+                </div>
+              </div>
+
+              {/* Evaluation Summary */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-bold text-lg mb-2">ملخص التقييم</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {evaluationResult.evaluationSummary}
+                </p>
+              </div>
+
+              {/* Strengths */}
+              <div className="p-4 bg-green-50 rounded-lg">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  نقاط القوة
+                </h3>
+                <ul className="space-y-2">
+                  {evaluationResult.strengths.map((strength: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span className="text-gray-700">{strength}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Weaknesses */}
+              <div className="p-4 bg-yellow-50 rounded-lg">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-600" />
+                  نقاط الضعف
+                </h3>
+                <ul className="space-y-2">
+                  {evaluationResult.weaknesses.map((weakness: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-yellow-600 mt-1">•</span>
+                      <span className="text-gray-700">{weakness}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Risks */}
+              <div className="p-4 bg-red-50 rounded-lg">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-red-600" />
+                  المخاطر
+                </h3>
+                <ul className="space-y-2">
+                  {evaluationResult.risks.map((risk: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-red-600 mt-1">•</span>
+                      <span className="text-gray-700">{risk}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Analysis Sections */}
+              <div className="space-y-4">
+                {evaluationResult.feasibilityOpinion && (
+                  <div className="p-4 border-r-4 border-blue-500 bg-blue-50">
+                    <h4 className="font-bold mb-2">رأي الجدوى</h4>
+                    <p className="text-gray-700">{evaluationResult.feasibilityOpinion}</p>
+                  </div>
+                )}
+                {evaluationResult.marketAnalysis && (
+                  <div className="p-4 border-r-4 border-green-500 bg-green-50">
+                    <h4 className="font-bold mb-2">تحليل السوق</h4>
+                    <p className="text-gray-700">{evaluationResult.marketAnalysis}</p>
+                  </div>
+                )}
+                {evaluationResult.financialAnalysis && (
+                  <div className="p-4 border-r-4 border-yellow-500 bg-yellow-50">
+                    <h4 className="font-bold mb-2">التحليل المالي</h4>
+                    <p className="text-gray-700">{evaluationResult.financialAnalysis}</p>
+                  </div>
+                )}
+                {evaluationResult.executionAnalysis && (
+                  <div className="p-4 border-r-4 border-purple-500 bg-purple-50">
+                    <h4 className="font-bold mb-2">تحليل التنفيذ</h4>
+                    <p className="text-gray-700">{evaluationResult.executionAnalysis}</p>
+                  </div>
+                )}
+                {evaluationResult.growthStrategy && (
+                  <div className="p-4 border-r-4 border-pink-500 bg-pink-50">
+                    <h4 className="font-bold mb-2">استراتيجية النمو</h4>
+                    <p className="text-gray-700">{evaluationResult.growthStrategy}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => {
+                    setShowEvaluationDialog(false);
+                    setSelectedTab("register");
+                  }}
+                  className="flex-1 gradient-bg"
+                >
+                  سجّل الآن للحصول على تقييم مفصّل
+                </Button>
+                <Button
+                  onClick={() => setShowEvaluationDialog(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  إغلاق
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

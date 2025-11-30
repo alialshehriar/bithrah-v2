@@ -1,19 +1,8 @@
-name = "bithrah-v2"
-main = "dist/index.js"
+name = "bithrah-api"
+main = "worker/index.ts"
 compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Environment variables
 [vars]
 NODE_ENV = "production"
-
-# Custom domains
-routes = [
-  { pattern = "bithrahapp.com/*", zone_name = "bithrahapp.com" }
-]
-
-# Build configuration
-[build]
-command = "pnpm build"
-
-[build.upload]
-format = "service-worker"

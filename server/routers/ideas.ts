@@ -41,6 +41,76 @@ export const ideasRouter = router({
       return idea;
     }),
 
+  // Quick evaluate idea text without saving (for early access popup)
+  quickEvaluate: protectedProcedure
+    .input(
+      z.object({
+        ideaName: z.string().min(3),
+        ideaDescription: z.string().min(10),
+        sector: z.string().optional(),
+        targetMarket: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        // Prepare idea input for evaluation
+        const ideaInput: IdeaInput = {
+          ideaName: input.ideaName,
+          ideaDescription: input.ideaDescription,
+          sector: input.sector,
+          targetMarket: input.targetMarket,
+        };
+
+        // Build evaluation prompt
+        const evaluationPrompt = buildEvaluationPrompt(ideaInput);
+
+        // Call AI for comprehensive evaluation
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: evaluationPrompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "idea_evaluation",
+              strict: true,
+              schema: EVALUATION_SCHEMA,
+            },
+          },
+        });
+
+        const content = response.choices[0].message.content;
+        const evaluation: EvaluationResult = JSON.parse(
+          typeof content === "string" ? content : "{}"
+        );
+
+        return {
+          evaluationSummary: evaluation.evaluationSummary,
+          strengths: evaluation.strengths,
+          weaknesses: evaluation.weaknesses,
+          risks: evaluation.risks,
+          feasibilityOpinion: evaluation.feasibilityOpinion,
+          strategicAnalysis: evaluation.strategicAnalysis,
+          financialAnalysis: evaluation.financialAnalysis,
+          marketAnalysis: evaluation.marketAnalysis,
+          executionAnalysis: evaluation.executionAnalysis,
+          growthStrategy: evaluation.growthStrategy,
+          scores: {
+            overall: evaluation.overallScore,
+            feasibility: evaluation.feasibilityScore,
+            market: evaluation.marketScore,
+            financial: evaluation.financialScore,
+            execution: evaluation.executionScore,
+            growth: evaluation.growthScore,
+          },
+        };
+      } catch (error) {
+        console.error("AI Evaluation failed:", error);
+        throw new Error("Failed to evaluate idea");
+      }
+    }),
+
   // Evaluate idea with AI - Enhanced version
   evaluate: protectedProcedure
     .input(z.object({ ideaId: z.number() }))

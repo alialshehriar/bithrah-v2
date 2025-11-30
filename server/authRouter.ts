@@ -66,7 +66,7 @@ export const authRouter = router({
       const verificationToken = generateVerificationToken(input.email);
       const verificationLink = `${process.env.VITE_APP_URL || 'https://bithrahapp.com'}/verify-email?token=${verificationToken}`;
 
-      await sendVerificationEmail(input.email, verificationLink);
+      await sendVerificationEmail(input.email, input.fullName, verificationLink);
 
       return {
         success: true,
