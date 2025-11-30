@@ -7,7 +7,7 @@ import EarlyAccess from "./pages/EarlyAccess";
 import EarlyAccessAdmin from "./pages/admin/EarlyAccessAdmin";
 
 function Router() {
-  // During early access period, show EarlyAccess page as main page
+  // During early access period, show EarlyAccess page as main page (updated)
   return (
     <Switch>
       <Route path={"/"} component={EarlyAccess} />
