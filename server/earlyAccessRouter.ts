@@ -22,7 +22,7 @@ export const earlyAccessRouter = router({
         phone: z.string().optional(),
         username: z.string().min(3, "اسم المستخدم يجب أن يكون 3 أحرف على الأقل"),
         source: z.string().min(1, "يرجى تحديد كيف عرفت عن بذره"),
-        referredBy: z.string().optional(), // كود الإحالة المستخدم
+        referralCode: z.string().optional(), // كود الإحالة المستخدم
       })
     )
     .mutation(async ({ input }: { input: any }) => {
@@ -72,18 +72,18 @@ export const earlyAccessRouter = router({
           username: input.username,
           source: input.source,
           referralCode,
-          referredBy: input.referredBy || null,
+          referredBy: input.referralCode || null,
           referralCount: 0,
           bonusYears: 1,
         })
         .returning();
 
       // If referred by someone, create referral record and update referrer
-      if (input.referredBy) {
+      if (input.referralCode) {
         const referrer = await db
           .select()
           .from(earlyAccessUsers)
-          .where(eq(earlyAccessUsers.referralCode, input.referredBy))
+          .where(eq(earlyAccessUsers.referralCode, input.referralCode))
           .limit(1);
 
         if (referrer.length > 0) {
@@ -91,7 +91,7 @@ export const earlyAccessRouter = router({
           await db.insert(earlyAccessReferrals).values({
             referrerId: referrer[0].id,
             referredId: newUser.id,
-            referralCode: input.referredBy,
+            referralCode: input.referralCode,
           });
 
           // Update referrer's count and bonus years

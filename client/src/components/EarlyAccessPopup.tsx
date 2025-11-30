@@ -94,7 +94,7 @@ export function EarlyAccessPopup() {
         username: email.split('@')[0], // Generate username from email
         source: 'popup',
         phone: phone || undefined,
-        referredBy: referralCode || undefined,
+        referralCode: referralCode || undefined,
       });
       
       setRegistered(true);
