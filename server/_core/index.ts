@@ -27,7 +27,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-async function startServer() {
+async function createApp() {
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
@@ -50,16 +50,30 @@ async function startServer() {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
-
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
-  }
-
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
-  });
+  return app;
 }
 
-startServer().catch(console.error);
+// For local development
+if (process.env.NODE_ENV === "development") {
+  (async () => {
+    const app = await createApp();
+    const server = createServer(app);
+    
+    const preferredPort = parseInt(process.env.PORT || "3000");
+    const port = await findAvailablePort(preferredPort);
+    
+    if (port !== preferredPort) {
+      console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    }
+    
+    server.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}/`);
+    });
+  })().catch(console.error);
+}
+
+// For Vercel serverless - export factory function
+export default async function handler(req: any, res: any) {
+  const app = await createApp();
+  return app(req, res);
+}
