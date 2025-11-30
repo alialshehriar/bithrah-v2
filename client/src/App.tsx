@@ -3,18 +3,18 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import EarlyAccess from "./pages/EarlyAccess";
 import EarlyAccessAdmin from "./pages/admin/EarlyAccessAdmin";
 
 function Router() {
-  // During early access period, only Home page and Admin panel are accessible
+  // During early access period, show EarlyAccess page as main page
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"} component={EarlyAccess} />
       {/* Admin routes are always accessible */}
       <Route path={"/admin/early-access"} component={EarlyAccessAdmin} />
-      {/* All other routes redirect to home during early access */}
-      <Route component={Home} />
+      {/* All other routes redirect to early access page */}
+      <Route component={EarlyAccess} />
     </Switch>
   );
 }
