@@ -4,14 +4,14 @@
   "installCommand": "pnpm install",
   "outputDirectory": "dist/public",
   "functions": {
-    "api/**/*.ts": {
+    "api/index.ts": {
       "runtime": "@vercel/node@3.0.0"
     }
   },
   "rewrites": [
     {
-      "source": "/api/trpc/:path*",
-      "destination": "/api/trpc/[trpc]"
+      "source": "/api/:path*",
+      "destination": "/api"
     },
     {
       "source": "/:path((?!api).*)*",
