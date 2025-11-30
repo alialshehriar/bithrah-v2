@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
+  "outputDirectory": "dist/public",
   "functions": {
     "api/server.js": {
       "memory": 3008,
@@ -12,7 +13,10 @@
     {
       "source": "/api/:path*",
       "destination": "/api/server.js"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
     }
-  ],
-  "outputDirectory": "dist/public"
+  ]
 }
