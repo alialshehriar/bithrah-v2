@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -41,8 +41,6 @@ export default function Footer() {
 
   const socialLinks = [
     { icon: Twitter, href: "https://x.com/bithrahapp", label: "X (Twitter)" },
-    { icon: Instagram, href: "https://instagram.com/bithrahapp", label: "Instagram" },
-    { icon: Linkedin, href: "https://linkedin.com/company/bithrah", label: "LinkedIn" },
   ];
 
   return (
