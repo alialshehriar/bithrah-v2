@@ -1,5 +1,31 @@
 {
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
-  "outputDirectory": "dist/client"
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/client/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/dist/client/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "/dist/client/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/dist/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/index.js"
+    }
+  ]
 }
