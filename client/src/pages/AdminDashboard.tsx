@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExternalLink, Users } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import {
   BarChart,
@@ -30,6 +32,8 @@ const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [showReferralsDialog, setShowReferralsDialog] = useState(false);
   
   // Fetch stats
   const { data: stats } = trpc.earlyAccess.getStats.useQuery();
@@ -196,33 +200,151 @@ export default function AdminDashboard() {
                   <TableRow>
                     <TableHead className="text-right">الاسم</TableHead>
                     <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                    <TableHead className="text-right">اليوزر</TableHead>
+                    <TableHead className="text-right">الجوال</TableHead>
                     <TableHead className="text-right">كود الإحالة</TableHead>
+                    <TableHead className="text-right">رابط الإحالة</TableHead>
+                    <TableHead className="text-right">أُحيل بواسطة</TableHead>
                     <TableHead className="text-right">الإحالات</TableHead>
                     <TableHead className="text-right">السنوات المجانية</TableHead>
-                    <TableHead className="text-right">المصدر</TableHead>
+                    <TableHead className="text-right">تاريخ التسجيل</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user: any) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.fullName}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                          {user.referralCode}
-                        </code>
-                      </TableCell>
-                      <TableCell>{user.referralCount}</TableCell>
-                      <TableCell>{user.bonusYears}</TableCell>
-                      <TableCell className="text-sm text-gray-600">{user.source}</TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredUsers.map((user: any) => {
+                    const referralLink = `https://bithrahapp.com/early-access?ref=${user.referralCode}`;
+                    const referredByUser = user.referredBy 
+                      ? allUsers.find((u: any) => u.referralCode === user.referredBy)
+                      : null;
+                    
+                    return (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.fullName}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+                            @{user.username}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-sm">{user.phone || '-'}</TableCell>
+                        <TableCell>
+                          <code className="bg-purple-100 px-2 py-1 rounded text-sm font-bold text-purple-800">
+                            {user.referralCode}
+                          </code>
+                        </TableCell>
+                        <TableCell>
+                          <a
+                            href={referralLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            فتح
+                          </a>
+                        </TableCell>
+                        <TableCell>
+                          {referredByUser ? (
+                            <div className="text-sm">
+                              <div className="font-medium">{referredByUser.fullName}</div>
+                              <div className="text-xs text-gray-500">@{referredByUser.username}</div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.referralCount > 0 ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowReferralsDialog(true);
+                              }}
+                              className="gap-1"
+                            >
+                              <Users className="w-3 h-3" />
+                              {user.referralCount}
+                            </Button>
+                          ) : (
+                            <span className="text-gray-400">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{user.bonusYears} سنة</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-gray-500">
+                          {new Date(user.createdAt).toLocaleDateString('ar-SA')}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Referrals Dialog */}
+      <Dialog open={showReferralsDialog} onOpenChange={setShowReferralsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>
+              قائمة المحالين لـ {selectedUser?.fullName}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* User Info */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">كود الإحالة:</span>
+                    <code className="bg-purple-100 px-2 py-1 rounded ml-2 font-bold text-purple-800">
+                      {selectedUser?.referralCode}
+                    </code>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">إجمالي الإحالات:</span>
+                    <span className="font-bold ml-2">{selectedUser?.referralCount}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Referred Users List */}
+            <div>
+              <h3 className="font-semibold mb-3">الأشخاص الذين تم إحالتهم:</h3>
+              <div className="space-y-2">
+                {allUsers
+                  .filter((u: any) => u.referredBy === selectedUser?.referralCode)
+                  .map((referredUser: any) => (
+                    <Card key={referredUser.id}>
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <div className="font-medium">{referredUser.fullName}</div>
+                            <div className="text-sm text-gray-600">{referredUser.email}</div>
+                            <div className="text-xs text-gray-500">@{referredUser.username}</div>
+                          </div>
+                          <div className="text-left">
+                            <div className="text-xs text-gray-500">تاريخ التسجيل</div>
+                            <div className="text-sm font-medium">
+                              {new Date(referredUser.createdAt).toLocaleDateString('ar-SA')}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

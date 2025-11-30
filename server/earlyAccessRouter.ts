@@ -122,6 +122,8 @@ export const earlyAccessRouter = router({
       }
       */
 
+      const referralLink = `https://bithrahapp.com/early-access?ref=${newUser.referralCode}`;
+
       return {
         success: true,
         user: {
@@ -130,6 +132,7 @@ export const earlyAccessRouter = router({
           email: newUser.email,
           username: newUser.username,
           referralCode: newUser.referralCode,
+          referralLink,
           bonusYears: newUser.bonusYears,
           referralCount: newUser.referralCount,
         },

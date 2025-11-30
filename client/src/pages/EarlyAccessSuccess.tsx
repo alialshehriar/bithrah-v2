@@ -23,9 +23,7 @@ export default function EarlyAccessSuccess() {
     }
   }, []);
 
-  const referralLink = userData 
-    ? `${window.location.origin}/?ref=${userData.referralCode}`
-    : '';
+  const referralLink = userData?.referralLink || `${window.location.origin}/early-access?ref=${userData?.referralCode || ''}`;
 
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
