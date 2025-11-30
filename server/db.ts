@@ -35,7 +35,7 @@ let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  const dbUrl = ENV.databaseUrl || process.env.DATABASE_URL;
+  const dbUrl = process.env.DATABASE_URL_NEW || ENV.databaseUrl || process.env.DATABASE_URL;
   if (!_db && dbUrl) {
     try {
       const sql = neon(dbUrl);

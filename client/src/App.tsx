@@ -14,6 +14,8 @@ import IPProtection from "./pages/IPProtection";
 import Projects from "./pages/Projects";
 import Community from "./pages/Community";
 import Leaderboard from "./pages/Leaderboard";
+import VerifyEmail from "./pages/VerifyEmail";
+import EarlyAccessSuccess from "./pages/EarlyAccessSuccess";
 
 function Router() {
   return (
@@ -34,6 +36,10 @@ function Router() {
       <Route path={"/projects"} component={Projects} />
       <Route path={"/community"} component={Community} />
       <Route path={"/leaderboard"} component={Leaderboard} />
+      
+      {/* Auth routes */}
+      <Route path={"/verify-email"} component={VerifyEmail} />
+      <Route path={"/early-access-success"} component={EarlyAccessSuccess} />
       
       {/* Admin routes */}
       <Route path={"/admin/early-access"} component={EarlyAccessAdmin} />

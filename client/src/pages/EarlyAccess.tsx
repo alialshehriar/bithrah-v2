@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { trpc } from "@/lib/trpc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function EarlyAccess() {
+  const [, setLocation] = useLocation();
   const [selectedTab, setSelectedTab] = useState("register");
   const [formData, setFormData] = useState({
     name: "",
@@ -39,6 +40,24 @@ export default function EarlyAccess() {
     referralCode: "",
   });
   const [ideaText, setIdeaText] = useState("");
+
+  // Check for referral code in URL on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      // Save to localStorage
+      localStorage.setItem('referral_code', refCode);
+      // Pre-fill form
+      setFormData(prev => ({ ...prev, referralCode: refCode }));
+    } else {
+      // Check if we have a saved referral code
+      const savedRefCode = localStorage.getItem('referral_code');
+      if (savedRefCode) {
+        setFormData(prev => ({ ...prev, referralCode: savedRefCode }));
+      }
+    }
+  }, []);
 
   // tRPC queries
   const { data: stats, isLoading: statsLoading } = trpc.earlyAccess.getStats.useQuery();
@@ -109,7 +128,7 @@ export default function EarlyAccess() {
     e.preventDefault();
 
     try {
-      await registerMutation.mutateAsync({
+      const result = await registerMutation.mutateAsync({
         fullName: formData.name,
         email: formData.email,
         phone: formData.phone || undefined,
@@ -118,15 +137,15 @@ export default function EarlyAccess() {
         referralCode: formData.referralCode || undefined,
       });
 
-      toast.success("تم التسجيل بنجاح! تحقق من بريدك الإلكتروني لتفعيل حسابك.");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        username: "",
-        howDidYouHear: "",
-        referralCode: "",
-      });
+      // Save user data to localStorage
+      localStorage.setItem('early_access_user', JSON.stringify(result.user));
+      // Clear referral code from localStorage after successful registration
+      localStorage.removeItem('referral_code');
+      
+      toast.success("تم التسجيل بنجاح!");
+      
+      // Redirect to success page
+      setLocation('/early-access-success');
     } catch (error: any) {
       toast.error(error.message || "حدث خطأ أثناء التسجيل");
     }
