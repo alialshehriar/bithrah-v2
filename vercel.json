@@ -8,13 +8,11 @@
       "runtime": "@vercel/node@3.0.0"
     }
   },
-  "routes": [
-    {
-      "src": "/api/trpc/(.*)",
-      "dest": "/api/trpc/[trpc].ts"
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/api/trpc/:path*",
+      "destination": "/api/trpc/[trpc]"
+    },
     {
       "source": "/:path((?!api).*)*",
       "destination": "/index.html"
