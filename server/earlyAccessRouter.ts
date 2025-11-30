@@ -289,4 +289,30 @@ export const earlyAccessRouter = router({
         limit: input.limit,
       };
     }),
+
+  // Get leaderboard (public)
+  getLeaderboard: publicProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new Error("Database connection failed");
+
+    const users = await db
+      .select()
+      .from(earlyAccessUsers)
+      .orderBy(sql`${earlyAccessUsers.referralCount} DESC, ${earlyAccessUsers.createdAt} ASC`)
+      .limit(100);
+
+    return users.map((u) => ({
+      id: u.id,
+      fullName: u.fullName,
+      username: u.username,
+      email: u.email,
+      phone: u.phone,
+      source: u.source,
+      referralCode: u.referralCode,
+      referredBy: u.referredBy,
+      referralCount: u.referralCount,
+      bonusYears: u.bonusYears,
+      createdAt: u.createdAt,
+    }));
+  }),
 });

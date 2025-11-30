@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { EarlyAccessPopup } from "@/components/EarlyAccessPopup";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -21,6 +22,7 @@ import MarketerDashboard from "./pages/MarketerDashboard";
 import EarlyAccess from "./pages/EarlyAccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
+import EarlyAccessAdmin from "./pages/admin/EarlyAccessAdmin";
 import About from "./pages/static/About";
 import Contact from "./pages/static/Contact";
 import FAQ from "./pages/FAQ";
@@ -52,6 +54,7 @@ function Router() {
       <Route path="/early-access" component={EarlyAccess} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/early-access" component={EarlyAccessAdmin} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/faq" component={FAQ} />
@@ -70,6 +73,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
+          <EarlyAccessPopup />
           <Toaster />
           <Router />
         </TooltipProvider>
