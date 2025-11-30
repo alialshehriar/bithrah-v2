@@ -4,19 +4,19 @@
   "installCommand": "pnpm install",
   "outputDirectory": "dist/public",
   "functions": {
-    "api/server.js": {
-      "memory": 3008,
-      "maxDuration": 30,
-      "includeFiles": "dist/**"
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3.0.0"
     }
   },
+  "routes": [
+    {
+      "src": "/api/trpc/(.*)",
+      "dest": "/api/trpc/[trpc].ts"
+    }
+  ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/server.js"
-    },
-    {
-      "source": "/:path*",
+      "source": "/:path((?!api).*)*",
       "destination": "/index.html"
     }
   ]
