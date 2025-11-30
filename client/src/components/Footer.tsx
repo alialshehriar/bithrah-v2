@@ -18,9 +18,7 @@ export default function Footer() {
       title: "المشاريع",
       links: [
         { label: "تصفح المشاريع", href: "/projects" },
-        { label: "ابدأ مشروعك", href: "/create-project" },
-        { label: "قصص نجاح", href: "/success-stories" },
-        { label: "الإحصائيات", href: "/stats" },
+        { label: "التسجيل المبكر", href: "/early-access" },
       ],
     },
     {
@@ -28,8 +26,6 @@ export default function Footer() {
       links: [
         { label: "المجتمع", href: "/community" },
         { label: "لوحة الصدارة", href: "/leaderboard" },
-        { label: "الفعاليات", href: "/events" },
-        { label: "الشركاء", href: "/partners" },
       ],
     },
     {
@@ -73,11 +69,11 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="space-y-3">
               <a
-                href="mailto:ali.alshehri.ar@gmail.com"
+                href="mailto:info@bithrahapp.com"
                 className="flex items-center gap-2 text-sm hover:text-white transition-colors"
               >
                 <Mail className="w-4 h-4" />
-                <span>ali.alshehri.ar@gmail.com</span>
+                <span>info@bithrahapp.com</span>
               </a>
               <a
                 href="tel:+966592725341"
@@ -143,7 +139,7 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Language & Currency (Optional) */}
+            {/* Language & Currency */}
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <span>العربية</span>
               <span className="text-gray-600">|</span>
