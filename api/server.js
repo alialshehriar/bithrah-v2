@@ -1,14 +1,19 @@
-// Vercel Serverless Function - Main Entry Point
-import { createApp } from '../server/_core/index.js';
+// Vercel Serverless Function - Uses built files from dist/
+const path = require('path');
 
-let app;
+// Import the built Express app
+const { createApp } = require(path.join(process.cwd(), 'dist', 'index.js'));
 
-export default async function handler(req, res) {
+let appPromise;
+
+module.exports = async function handler(req, res) {
   // Initialize app once (cached across invocations)
-  if (!app) {
-    app = await createApp();
+  if (!appPromise) {
+    appPromise = createApp();
   }
+  
+  const app = await appPromise;
   
   // Handle the request
   return app(req, res);
-}
+};
