@@ -1,23 +1,12 @@
 {
   "version": 2,
   "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
-  "framework": null,
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": "dist/public",
-  "builds": [
+  "rewrites": [
     {
-      "src": "dist/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "dist/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/:path((?!api).*)*",
+      "destination": "/index.html"
     }
   ]
 }
