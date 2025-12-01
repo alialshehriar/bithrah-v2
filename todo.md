@@ -1095,7 +1095,6 @@
 1. الذهاب إلى [Render Dashboard](https://dashboard.render.com/) → bithrah-v2 service → Environment
 2. إضافة أو تحديث:
    ```
-   OPENAI_API_KEY=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
    ```
 3. إعادة تشغيل service
 4. اختبار https://www.bithrahapp.com/evaluate

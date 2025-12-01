@@ -216,7 +216,7 @@ const resolveApiUrl = () => {
   }
   
   // Priority 2: Default to Manus Forge API (works on both Manus and Render)
-  return "https://forge.manus.im/v1/chat/completions";
+  return "https://forge.manus.ai/v1/chat/completions";
 };
 
 const assertApiKey = () => {
