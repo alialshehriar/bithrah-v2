@@ -210,17 +210,12 @@ const normalizeToolChoice = (
 };
 
 const resolveApiUrl = () => {
-  // If Forge API URL is available, use it
+  // Priority 1: Use Forge API if URL is explicitly set
   if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
     return `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`;
   }
   
-  // If OPENAI_API_KEY is set (not Forge), use OpenAI directly
-  if (process.env.OPENAI_API_KEY && !process.env.BUILT_IN_FORGE_API_KEY) {
-    return "https://api.openai.com/v1/chat/completions";
-  }
-  
-  // Default to Forge API
+  // Priority 2: Default to Manus Forge API (works on both Manus and Render)
   return "https://forge.manus.im/v1/chat/completions";
 };
 
@@ -289,9 +284,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
-  // Use appropriate model based on API
-  const isOpenAI = process.env.OPENAI_API_KEY && !process.env.BUILT_IN_FORGE_API_KEY;
-  const model = isOpenAI ? "gpt-4o-mini" : "gemini-2.5-flash";
+  // Always use Gemini model for Manus Forge API
+  const model = "gemini-2.5-flash";
   
   const payload: Record<string, unknown> = {
     model,
