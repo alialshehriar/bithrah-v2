@@ -1,0 +1,18 @@
+import 'dotenv/config';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { createNextApiHandler } from '@trpc/server/adapters/next';
+import { appRouter } from '../../server/routers';
+import { createContext } from '../../server/_core/context';
+
+export default createNextApiHandler({
+  router: appRouter,
+  createContext,
+  onError:
+    process.env.NODE_ENV === 'development'
+      ? ({ path, error }) => {
+          console.error(
+            `❌ tRPC failed on ${path ?? '<no-path>'}: ${error.message}`,
+          );
+        }
+      : undefined,
+});

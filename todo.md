@@ -867,9 +867,9 @@
 - [ ] تخطيط file structure الجديد
 
 ### المرحلة 2: إنشاء Serverless Functions
-- [ ] إنشاء `api/trpc/[trpc].ts` لـ tRPC endpoints
-- [ ] تحويل من Express adapter إلى Vercel adapter
-- [ ] نقل context creation
+- [x] إنشاء `api/index.ts` كـ Express wrapper
+- [x] إضافة error handling وlazy initialization
+- [x] نشر على Vercel (commit: d234715)
 
 ### المرحلة 3: OAuth Callback
 - [ ] إنشاء `api/oauth/callback.ts`
