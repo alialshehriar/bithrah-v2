@@ -210,18 +210,23 @@ const normalizeToolChoice = (
 };
 
 const resolveApiUrl = () => {
-  // Priority 1: Use Forge API if URL is explicitly set
+  // Use OpenAI API if OPENAI_API_KEY is set (for Render/production)
+  if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+    return "https://api.openai.com/v1/chat/completions";
+  }
+  
+  // Fallback to Manus Forge API (for Manus environment)
   if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
     return `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`;
   }
   
-  // Priority 2: Default to Manus Forge API (works on both Manus and Render)
   return "https://forge.manus.ai/v1/chat/completions";
 };
 
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+  // Check for either OpenAI key or Forge key
+  if (!ENV.openaiApiKey && !ENV.forgeApiKey) {
+    throw new Error("No API key configured (OPENAI_API_KEY or BUILT_IN_FORGE_API_KEY required)");
   }
 };
 
@@ -284,8 +289,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
-  // Always use Gemini model for Manus Forge API
-  const model = "gemini-2.5-flash";
+  // Use appropriate model based on API
+  const model = ENV.openaiApiKey ? "gpt-4o-mini" : "gemini-2.5-flash";
   
   const payload: Record<string, unknown> = {
     model,
@@ -304,9 +309,14 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
+  // Only add thinking for Gemini
+  if (!ENV.openaiApiKey) {
+    payload.max_tokens = 32768;
+    payload.thinking = {
+      "budget_tokens": 128
+    };
+  } else {
+    payload.max_tokens = 4096;
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -320,11 +330,14 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
+  // Use appropriate API key
+  const apiKey = ENV.openaiApiKey || ENV.forgeApiKey;
+  
   const response = await fetch(resolveApiUrl(), {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
   });
