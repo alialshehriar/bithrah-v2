@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ExternalLink, Users } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
@@ -31,12 +32,20 @@ import { Badge } from '@/components/ui/badge';
 const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
 
 export default function AdminDashboard() {
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showReferralsDialog, setShowReferralsDialog] = useState(false);
   
   // Fetch stats
-  const { data: stats } = trpc.admin.getStats.useQuery();
+  const { data: stats, error: statsError } = trpc.admin.getStats.useQuery();
+  
+  // Check auth and redirect if unauthorized
+  useEffect(() => {
+    if (statsError && 'data' in statsError && statsError.data?.code === 'UNAUTHORIZED') {
+      setLocation('/admin/login');
+    }
+  }, [statsError, setLocation]);
   const { data: allUsers } = trpc.admin.getAllUsers.useQuery({ limit: 1000, offset: 0 });
   const { data: evaluationsData } = trpc.admin.getAllEvaluations.useQuery({ limit: 1000, offset: 0 });
 
