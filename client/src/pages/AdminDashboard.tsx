@@ -37,15 +37,20 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showReferralsDialog, setShowReferralsDialog] = useState(false);
   
-  // Fetch stats
-  const { data: stats, error: statsError } = trpc.admin.getStats.useQuery();
+  // Check auth first
+  const { data: authCheck, isLoading: authLoading } = trpc.admin.checkAuth.useQuery();
   
-  // Check auth and redirect if unauthorized
+  // Redirect if not authenticated
   useEffect(() => {
-    if (statsError && 'data' in statsError && statsError.data?.code === 'UNAUTHORIZED') {
+    if (!authLoading && !authCheck?.isAuthenticated) {
       setLocation('/admin/login');
     }
-  }, [statsError, setLocation]);
+  }, [authCheck, authLoading, setLocation]);
+  
+  // Fetch stats only if authenticated
+  const { data: stats } = trpc.admin.getStats.useQuery(undefined, {
+    enabled: authCheck?.isAuthenticated === true,
+  });
   const { data: allUsers } = trpc.admin.getAllUsers.useQuery({ limit: 1000, offset: 0 });
   const { data: evaluationsData } = trpc.admin.getAllEvaluations.useQuery({ limit: 1000, offset: 0 });
 
