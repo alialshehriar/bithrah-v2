@@ -2,7 +2,7 @@ import 'dotenv/config';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as db from '../../server/db';
 import { sdk } from '../../server/_core/sdk';
-import { COOKIE_NAME, ONE_YEAR_MS } from '../../server/_core/cookies';
+import { COOKIE_NAME, ONE_YEAR_MS } from '../../shared/const';
 
 function getQueryParam(req: NextApiRequest, key: string): string | undefined {
   const value = req.query[key];
