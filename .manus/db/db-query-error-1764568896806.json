@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM earlyAccessReferrals; DELETE FROM earlyAccessUsers;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute DELETE FROM earlyAccessReferrals; DELETE FROM earlyAccessUsers;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'vraozac7wzxcfu6soj8xbx.earlyAccessReferrals' doesn't exist"
+  ]
+}
