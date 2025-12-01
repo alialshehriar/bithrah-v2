@@ -364,7 +364,7 @@ export default function EarlyAccess() {
         <section className="py-12">
           <div className="container">
             <div>
-              <div className="grid w-full grid-cols-3 mb-8 bg-gray-100 rounded-lg p-1">
+              <div className="grid w-full grid-cols-2 mb-8 bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setSelectedTab('register')}
                   className={`py-3 px-4 rounded-md font-medium transition-all ${
@@ -374,16 +374,6 @@ export default function EarlyAccess() {
                   }`}
                 >
                   التسجيل المبكر
-                </button>
-                <button
-                  onClick={() => setSelectedTab('evaluate')}
-                  className={`py-3 px-4 rounded-md font-medium transition-all ${
-                    selectedTab === 'evaluate'
-                      ? 'bg-white shadow-sm text-purple-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  قيّم فكرتك
                 </button>
                 <button
                   onClick={() => setSelectedTab('leaderboard')}
@@ -579,56 +569,6 @@ export default function EarlyAccess() {
                       </div>
                     </Card>
                   </div>
-                </div>
-              </div>
-
-              {/* Evaluate Tab */}
-              <div className={selectedTab !== 'evaluate' ? 'hidden' : ''}>
-                <div className="max-w-3xl mx-auto">
-                  <Card className="p-8">
-                    <div className="mb-6">
-                      <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
-                        <Sparkles className="w-8 h-8 text-yellow-500" />
-                        قيّم فكرتك بالذكاء الاصطناعي
-                      </h2>
-                      <p className="text-gray-600">
-                        اكتب فكرتك وسنقوم بتقييمها باستخدام الذكاء الاصطناعي
-                      </p>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          وصف الفكرة
-                        </label>
-                        <Textarea
-                          placeholder="اكتب فكرتك بالتفصيل..."
-                          value={ideaText}
-                          onChange={(e) => setIdeaText(e.target.value)}
-                          rows={10}
-                          className="resize-none"
-                        />
-                      </div>
-
-                      <Button
-                        onClick={handleEvaluateIdea}
-                        className="w-full gradient-bg text-lg py-6"
-                        disabled={evaluateMutation.isPending || !ideaText.trim()}
-                      >
-                        {evaluateMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-5 h-5 ml-2 animate-spin" />
-                            جاري التقييم...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-5 h-5 ml-2" />
-                            قيّم فكرتي
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </Card>
                 </div>
               </div>
 
