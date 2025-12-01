@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { invokeLLM } from "../_core/llm";
 import {
@@ -42,7 +42,7 @@ export const ideasRouter = router({
     }),
 
   // Quick evaluate idea text without saving (for early access popup)
-  quickEvaluate: protectedProcedure
+  quickEvaluate: publicProcedure
     .input(
       z.object({
         ideaName: z.string().min(3),
