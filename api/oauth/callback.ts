@@ -1,15 +1,15 @@
 import 'dotenv/config';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as db from '../../server/db';
 import { sdk } from '../../server/_core/sdk';
 import { COOKIE_NAME, ONE_YEAR_MS } from '../../shared/const';
 
-function getQueryParam(req: NextApiRequest, key: string): string | undefined {
+function getQueryParam(req: VercelRequest, key: string): string | undefined {
   const value = req.query[key];
   return typeof value === 'string' ? value : undefined;
 }
 
-function getSessionCookieOptions(req: NextApiRequest) {
+function getSessionCookieOptions(req: VercelRequest) {
   const isSecure = req.headers['x-forwarded-proto'] === 'https' || 
                    req.headers.host?.includes('localhost');
   
@@ -21,7 +21,7 @@ function getSessionCookieOptions(req: NextApiRequest) {
   };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
