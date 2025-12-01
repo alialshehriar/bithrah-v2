@@ -201,7 +201,8 @@ export const ideasRouter = router({
         // Convert arrays to strings for database storage
         const strengthsText = evaluation.strengths.join("\n• ");
         const weaknessesText = evaluation.weaknesses.join("\n• ");
-        const risksText = evaluation.risks.join("\n• ");
+        const opportunitiesText = evaluation.opportunities.join("\n• ");
+        const threatsText = evaluation.threats.join("\n• ");
 
         // Update idea with evaluation results
         const updatedIdea = await db.updateIdea(input.ideaId, {
@@ -209,13 +210,13 @@ export const ideasRouter = router({
           evaluationSummary: evaluation.evaluationSummary,
           strengths: strengthsText,
           weaknesses: weaknessesText,
-          risks: risksText,
-          feasibilityOpinion: evaluation.feasibilityOpinion,
-          strategicAnalysis: evaluation.strategicAnalysis,
-          financialAnalysis: evaluation.financialAnalysis,
+          risks: threatsText,
+          feasibilityOpinion: JSON.stringify(evaluation.leanCanvas),
+          strategicAnalysis: evaluation.competitiveAnalysis,
+          financialAnalysis: JSON.stringify(evaluation.financialProjection),
           marketAnalysis: evaluation.marketAnalysis,
-          executionAnalysis: evaluation.executionAnalysis,
-          growthStrategy: evaluation.growthStrategy,
+          executionAnalysis: JSON.stringify(evaluation.executionRoadmap),
+          growthStrategy: evaluation.riskAssessment,
           overallScore: evaluation.overallScore.toString(),
           evaluatedAt: new Date(),
         });
