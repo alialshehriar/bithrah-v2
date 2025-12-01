@@ -293,6 +293,77 @@ export const earlyAccessRouter = router({
       };
     }),
 
+  // Get user dashboard data by email
+  getUserDashboard: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .query(async ({ input }: { input: any }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database connection failed");
+
+      // Get user data
+      const [user] = await db
+        .select()
+        .from(earlyAccessUsers)
+        .where(eq(earlyAccessUsers.email, input.email))
+        .limit(1);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Get user's referrals (people they referred)
+      const referrals = await db
+        .select({
+          id: earlyAccessReferrals.id,
+          referredId: earlyAccessReferrals.referredId,
+          createdAt: earlyAccessReferrals.createdAt,
+          fullName: earlyAccessUsers.fullName,
+          username: earlyAccessUsers.username,
+          email: earlyAccessUsers.email,
+        })
+        .from(earlyAccessReferrals)
+        .leftJoin(
+          earlyAccessUsers,
+          eq(earlyAccessReferrals.referredId, earlyAccessUsers.id)
+        )
+        .where(eq(earlyAccessReferrals.referrerId, user.id))
+        .orderBy(sql`${earlyAccessReferrals.createdAt} DESC`);
+
+      // Get user's position in leaderboard
+      const allUsers = await db
+        .select({ id: earlyAccessUsers.id, referralCount: earlyAccessUsers.referralCount })
+        .from(earlyAccessUsers)
+        .orderBy(sql`${earlyAccessUsers.referralCount} DESC, ${earlyAccessUsers.createdAt} ASC`);
+
+      const position = allUsers.findIndex((u) => u.id === user.id) + 1;
+
+      return {
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          source: user.source,
+          referralCode: user.referralCode,
+          referredBy: user.referredBy,
+          referralCount: user.referralCount,
+          bonusYears: user.bonusYears,
+          createdAt: user.createdAt,
+          referralLink: `https://bithrahapp.com/early-access?ref=${user.referralCode}`,
+        },
+        referrals: referrals.map((r) => ({
+          id: r.id,
+          fullName: r.fullName,
+          username: r.username,
+          email: r.email,
+          createdAt: r.createdAt,
+        })),
+        leaderboardPosition: position,
+        totalUsers: allUsers.length,
+      };
+    }),
+
   // Get leaderboard (public)
   getLeaderboard: publicProcedure.query(async () => {
     const db = await getDb();

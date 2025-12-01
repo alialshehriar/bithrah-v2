@@ -20,6 +20,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import Evaluate from "./pages/Evaluate";
 import EnhancedAdminDashboard from "./pages/admin/EnhancedAdminDashboard";
+import EarlyAccessDashboard from "./pages/EarlyAccessDashboard";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       {/* Main page - Early Access */}
       <Route path={"/"} component={EarlyAccess} />
       <Route path={"/early-access"} component={EarlyAccess} />
+      <Route path={"/dashboard"} component={EarlyAccessDashboard} />
       <Route path={"/evaluate"} component={Evaluate} />
       
       {/* Static pages */}

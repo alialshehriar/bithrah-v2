@@ -209,10 +209,20 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
+const resolveApiUrl = () => {
+  // If Forge API URL is available, use it
+  if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
+    return `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`;
+  }
+  
+  // If OPENAI_API_KEY is set (not Forge), use OpenAI directly
+  if (process.env.OPENAI_API_KEY && !process.env.BUILT_IN_FORGE_API_KEY) {
+    return "https://api.openai.com/v1/chat/completions";
+  }
+  
+  // Default to Forge API
+  return "https://forge.manus.im/v1/chat/completions";
+};
 
 const assertApiKey = () => {
   if (!ENV.forgeApiKey) {
@@ -279,8 +289,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
+  // Use appropriate model based on API
+  const isOpenAI = process.env.OPENAI_API_KEY && !process.env.BUILT_IN_FORGE_API_KEY;
+  const model = isOpenAI ? "gpt-4o-mini" : "gemini-2.5-flash";
+  
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model,
     messages: messages.map(normalizeMessage),
   };
 

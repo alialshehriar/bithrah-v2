@@ -138,14 +138,18 @@ export default function EarlyAccessSuccess() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={() => setLocation('/dashboard')} className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <Sparkles className="w-4 h-4 ml-2" />
+              لوحة التحكم الخاصة بك
+            </Button>
             <Button onClick={() => setLocation('/leaderboard')} variant="outline" className="flex-1">
               <Trophy className="w-4 h-4 ml-2" />
-              شاهد لوحة الصدارة
-            </Button>
-            <Button onClick={() => setLocation('/')} className="flex-1">
-              العودة إلى الصفحة الرئيسية
+              لوحة الصدارة
             </Button>
           </div>
+          <Button onClick={() => setLocation('/')} variant="ghost" className="w-full mt-2">
+            العودة إلى الصفحة الرئيسية
+          </Button>
         </Card>
       </main>
 
