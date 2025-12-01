@@ -26,11 +26,20 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading, isAuthenticated } = useAuth();
   const [selectedTab, setSelectedTab] = useState("overview");
 
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   // Redirect if not logged in
-  if (!user) {
+  if (!isAuthenticated || !user) {
     window.location.href = "/admin/login";
     return null;
   }
