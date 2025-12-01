@@ -53,16 +53,20 @@ async function createApp() {
   return app;
 }
 
-// For local development
-if (process.env.NODE_ENV === "development") {
+// For local development and production (Render, Railway, etc.)
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "production") {
   (async () => {
     const app = await createApp();
     const server = createServer(app);
     
     const preferredPort = parseInt(process.env.PORT || "3000");
-    const port = await findAvailablePort(preferredPort);
     
-    if (port !== preferredPort) {
+    // In production (Render/Railway), use exact PORT without fallback
+    const port = process.env.NODE_ENV === "production" 
+      ? preferredPort 
+      : await findAvailablePort(preferredPort);
+    
+    if (port !== preferredPort && process.env.NODE_ENV === "development") {
       console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
     }
     
