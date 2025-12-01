@@ -136,12 +136,7 @@ export const ideasRouter = router({
           ideaName: idea.ideaName,
           ideaDescription: idea.ideaDescription,
           sector: idea.sector || undefined,
-          category: idea.category || undefined,
-          stage: idea.stage || undefined,
-          technicalNeeds: idea.technicalNeeds || undefined,
-          financialNeeds: idea.financialNeeds || undefined,
           targetMarket: idea.targetMarket || undefined,
-          competitiveAdvantage: idea.competitiveAdvantage || undefined,
         };
 
         // Build evaluation prompt

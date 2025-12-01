@@ -112,7 +112,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-3">
               <CardDescription>إجمالي السنوات المجانية</CardDescription>
               <CardTitle className="text-3xl">
-                {allUsers.reduce((sum: number, u: any) => sum + u.bonusYears, 0)}
+                {allUsers?.reduce((sum: number, u: any) => sum + u.bonusYears, 0) || 0}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -130,17 +130,17 @@ export default function AdminDashboard() {
               <CardDescription>المستخدمون الأكثر إحالة</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topReferrers}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="referrals" fill="#667eea" name="الإحالات" />
-                  <Bar dataKey="bonusYears" fill="#764ba2" name="السنوات المجانية" />
-                </BarChart>
-              </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={topReferrers || []}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="referrals" fill="#667eea" name="عدد الإحالات" />
+              <Bar dataKey="bonusYears" fill="#764ba2" name="السنوات المجانية" />
+            </BarChart>
+          </ResponsiveContainer>
             </CardContent>
           </Card>
 
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
         {/* Users Table */}
         <Card>
           <CardHeader>
-            <CardTitle>جميع المستخدمين ({allUsers.length})</CardTitle>
+            <CardTitle>جميع المستخدمين ({allUsers?.length || 0})</CardTitle>
             <CardDescription>
               <div className="flex items-center gap-4 mt-4">
                 <Input
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
                   {filteredUsers.map((user: any) => {
                     const referralLink = `https://bithrahapp.com/early-access?ref=${user.referralCode}`;
                     const referredByUser = user.referredBy 
-                      ? allUsers.find((u: any) => u.referralCode === user.referredBy)
+                      ? allUsers?.find((u: any) => u.referralCode === user.referredBy)
                       : null;
                     
                     return (
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
             <div>
               <h3 className="font-semibold mb-3">الأشخاص الذين تم إحالتهم:</h3>
               <div className="space-y-2">
-                {allUsers
+                {(allUsers || [])
                   .filter((u: any) => u.referredBy === selectedUser?.referralCode)
                   .map((referredUser: any) => (
                     <Card key={referredUser.id}>

@@ -113,14 +113,19 @@ export function EarlyAccessModal({ isOpen }: EarlyAccessModalProps) {
       
       // عرض النتيجة
       const evaluation = `
-⭐ التقييم العام: ${result.scores.overall}/100
+⭐ التقييم العام: ${result.overallScore}/100
 
-📈 التفاصيل:
-- جدوى التنفيذ: ${result.scores.feasibility}/100
-- السوق: ${result.scores.market}/100
-- الجدوى المالية: ${result.scores.financial}/100
-- التنفيذ: ${result.scores.execution}/100
-- النمو: ${result.scores.growth}/100
+💪 نقاط القوة:
+${result.strengths.map((s: string) => `- ${s}`).join('\n')}
+
+⚠️ نقاط الضعف:
+${result.weaknesses.map((w: string) => `- ${w}`).join('\n')}
+
+💡 التوصيات:
+${result.recommendations.map((r: string) => `- ${r}`).join('\n')}
+
+📝 الملخص:
+${result.evaluationSummary}
       `.trim();
       
       setEvaluationResult(evaluation);
