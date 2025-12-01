@@ -812,16 +812,16 @@ export const earlyAccessUsers = pgTable(
   "early_access_users",
   {
     id: serial("id").primaryKey(),
-    fullName: text("fullName").notNull(),
+    fullName: text("full_name").notNull(),
     email: text("email").notNull().unique(),
     phone: text("phone"),
     username: text("username").notNull().unique(),
     source: text("source").notNull(), // من أين عرف عن بذره
-    referralCode: text("referralCode").notNull().unique(), // كود الإحالة الخاص به
-    referredBy: text("referredBy"), // كود الإحالة الذي استخدمه للتسجيل
-    referralCount: integer("referralCount").default(0).notNull(), // عدد الإحالات الناجحة
-    bonusYears: integer("bonusYears").default(1).notNull(), // سنوات الاشتراك المجاني (1 + عدد الإحالات)
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    referralCode: text("referral_code").notNull().unique(), // كود الإحالة الخاص به
+    referredBy: text("referred_by"), // كود الإحالة الذي استخدمه للتسجيل
+    referralCount: integer("referral_count").default(0).notNull(), // عدد الإحالات الناجحة
+    bonusYears: integer("bonus_years").default(1).notNull(), // سنوات الاشتراك المجاني (1 + عدد الإحالات)
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
     emailIdx: uniqueIndex("early_access_email_idx").on(table.email),
@@ -835,10 +835,10 @@ export const earlyAccessReferrals = pgTable(
   "early_access_referrals",
   {
     id: serial("id").primaryKey(),
-    referrerId: integer("referrerId").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
-    referredId: integer("referredId").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
-    referralCode: text("referralCode").notNull(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    referrerId: integer("referrer_id").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
+    referredId: integer("referred_id").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
+    referralCode: text("referral_code").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
     referrerIdIdx: index("early_access_referrals_referrer_id_idx").on(table.referrerId),

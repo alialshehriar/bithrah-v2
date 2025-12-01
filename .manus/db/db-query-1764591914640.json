@@ -1,0 +1,9 @@
+{
+  "query": "DROP TABLE IF EXISTS early_access_referrals CASCADE;\nDROP TABLE IF EXISTS early_access_users CASCADE;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute DROP TABLE IF EXISTS early_access_referrals CASCADE;\nDROP TABLE IF EXISTS early_access_users CASCADE;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3098
+}
