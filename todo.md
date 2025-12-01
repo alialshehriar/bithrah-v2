@@ -844,6 +844,7 @@
 - [x] تخزين credentials بشكل آمن في Environment Variables
 - [x] إضافة session management
 - [x] اختبار تسجيل الدخول
-- [ ] رفع التحديثات على GitHub
-- [ ] نشر على Vercel
+- [x] رفع التحديثات على GitHub
+- [x] تحديث DEPLOYMENT_GUIDE.md بإضافة ADMIN credentials
+- [ ] نشر على Vercel (يتم يدوياً عبر لوحة Vercel)
 - [ ] اختبار على الدومين المباشر
