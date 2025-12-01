@@ -17,6 +17,7 @@ import Leaderboard from "./pages/Leaderboard";
 import VerifyEmail from "./pages/VerifyEmail";
 import EarlyAccessSuccess from "./pages/EarlyAccessSuccess";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminLogin from "./pages/AdminLogin";
 import Evaluate from "./pages/Evaluate";
 
 function Router() {
@@ -45,6 +46,7 @@ function Router() {
       <Route path={"/early-access-success"} component={EarlyAccessSuccess} />
       
       {/* Admin routes */}
+      <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/admin/early-access"} component={EarlyAccessAdmin} />
       

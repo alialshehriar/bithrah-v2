@@ -6,9 +6,35 @@ import { trpc } from "@/lib/trpc";
 import { Download, Search, Users, TrendingUp, Award, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function AdminEarlyAccess() {
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Check authentication
+  const { data: authData, isLoading: authLoading } = trpc.admin.checkAuth.useQuery();
+  
+  useEffect(() => {
+    if (!authLoading && !authData?.isAuthenticated) {
+      setLocation('/admin/login');
+    }
+  }, [authData, authLoading, setLocation]);
+  
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+  
+  // Redirect if not authenticated
+  if (!authData?.isAuthenticated) {
+    return null;
+  }
   
   // Fetch all early access users
   const { data: users, isLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
