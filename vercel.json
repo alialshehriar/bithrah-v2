@@ -2,11 +2,22 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
+  "framework": null,
   "outputDirectory": "dist/public",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/:path((?!api).*)*",
-      "destination": "/index.html"
+      "src": "dist/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "dist/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
