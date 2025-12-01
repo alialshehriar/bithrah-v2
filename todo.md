@@ -968,12 +968,12 @@
 - [ ] إضافة route محمي (admin only)
 
 ### Phase 4: اختبار روابط الإحالة والتسجيل بـ ref code
-- [ ] اختبار التسجيل بدون ref code
-- [ ] اختبار التسجيل مع ref code
-- [ ] التحقق من زيادة referral_count
-- [ ] التحقق من زيادة bonus_years للمُحيل
-- [ ] التحقق من حفظ referred_by للمُحال
-- [ ] التحقق من حفظ البيانات في early_access_referrals
+- [x] اختبار التسجيل بدون ref code
+- [x] اختبار التسجيل مع ref code
+- [x] التحقق من زيادة referral_count
+- [x] التحقق من زيادة bonus_years للمُحيل
+- [x] التحقق من حفظ referred_by للمُحال
+- [x] التحقق من حفظ البيانات في early_access_referrals
 
 ### Phase 5: اختبار شامل على production (www.bithrahapp.com)
 - [ ] اختبار الصفحة الرئيسية
