@@ -77,6 +77,10 @@ SMTP_USER=<SMTP username>
 SMTP_PASS=<SMTP password>
 SMTP_FROM_EMAIL=<من بريدك>
 
+# Admin Credentials (مطلوب للوحة الإدارة)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=YourSecurePassword123!
+
 # Analytics (اختياري)
 VITE_ANALYTICS_ENDPOINT=<من Manus>
 VITE_ANALYTICS_WEBSITE_ID=<من Manus>
