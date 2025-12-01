@@ -101,26 +101,11 @@ export const ideasRouter = router({
         }
 
         return {
+          overallScore: evaluation.overallScore,
           evaluationSummary: evaluation.evaluationSummary,
-          leanCanvas: evaluation.leanCanvas,
-          financialProjection: evaluation.financialProjection,
-          executionRoadmap: evaluation.executionRoadmap,
           strengths: evaluation.strengths,
           weaknesses: evaluation.weaknesses,
-          opportunities: evaluation.opportunities,
-          threats: evaluation.threats,
-          marketAnalysis: evaluation.marketAnalysis,
-          competitiveAnalysis: evaluation.competitiveAnalysis,
-          riskAssessment: evaluation.riskAssessment,
           recommendations: evaluation.recommendations,
-          scores: {
-            overall: evaluation.overallScore,
-            feasibility: evaluation.feasibilityScore,
-            market: evaluation.marketScore,
-            financial: evaluation.financialScore,
-            execution: evaluation.executionScore,
-            growth: evaluation.growthScore,
-          },
         };
       } catch (error) {
         console.error("AI Evaluation failed:", error);
@@ -201,8 +186,7 @@ export const ideasRouter = router({
         // Convert arrays to strings for database storage
         const strengthsText = evaluation.strengths.join("\n• ");
         const weaknessesText = evaluation.weaknesses.join("\n• ");
-        const opportunitiesText = evaluation.opportunities.join("\n• ");
-        const threatsText = evaluation.threats.join("\n• ");
+        const recommendationsText = evaluation.recommendations.join("\n• ");
 
         // Update idea with evaluation results
         const updatedIdea = await db.updateIdea(input.ideaId, {
@@ -210,27 +194,18 @@ export const ideasRouter = router({
           evaluationSummary: evaluation.evaluationSummary,
           strengths: strengthsText,
           weaknesses: weaknessesText,
-          risks: threatsText,
-          feasibilityOpinion: JSON.stringify(evaluation.leanCanvas),
-          strategicAnalysis: evaluation.competitiveAnalysis,
-          financialAnalysis: JSON.stringify(evaluation.financialProjection),
-          marketAnalysis: evaluation.marketAnalysis,
-          executionAnalysis: JSON.stringify(evaluation.executionRoadmap),
-          growthStrategy: evaluation.riskAssessment,
+          risks: recommendationsText,
           overallScore: evaluation.overallScore.toString(),
           evaluatedAt: new Date(),
         });
 
         return {
           ...updatedIdea,
-          scores: {
-            overall: evaluation.overallScore,
-            feasibility: evaluation.feasibilityScore,
-            market: evaluation.marketScore,
-            financial: evaluation.financialScore,
-            execution: evaluation.executionScore,
-            growth: evaluation.growthScore,
-          },
+          overallScore: evaluation.overallScore,
+          evaluationSummary: evaluation.evaluationSummary,
+          strengths: evaluation.strengths,
+          weaknesses: evaluation.weaknesses,
+          recommendations: evaluation.recommendations,
         };
       } catch (error) {
         console.error("AI Evaluation failed:", error);
