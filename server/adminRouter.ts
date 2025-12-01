@@ -91,6 +91,9 @@ export const adminRouter = router({
   
   getStats: requireAdmin.query(async () => {
     const db = await getDb();
+    if (!db) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    }
     
     // Get total early access users
     const totalUsersResult = await db
@@ -117,26 +120,11 @@ export const adminRouter = router({
       .from(earlyAccessUsers);
     const totalReferrals = totalReferralsResult[0]?.count || 0;
 
-    // Get users by batch
-    const batchStatsResult = await db
-      .select({
-        batch: earlyAccessUsers.batch,
-        count: sql<number>`cast(count(*) as int)`,
-      })
-      .from(earlyAccessUsers)
-      .groupBy(earlyAccessUsers.batch);
-    
-    const batchStats = batchStatsResult.reduce((acc, row) => {
-      acc[row.batch] = row.count;
-      return acc;
-    }, {} as Record<string, number>);
-
     return {
       totalUsers,
       totalEvaluations,
       completedEvaluations,
       totalReferrals,
-      batchStats,
     };
   }),
 
@@ -154,11 +142,14 @@ export const adminRouter = router({
     .query(async ({ input }) => {
       const { limit, offset } = input;
       const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       const users = await db
         .select()
         .from(earlyAccessUsers)
-        .orderBy(desc(earlyAccessUsers.created_at))
+        .orderBy(desc(earlyAccessUsers.createdAt))
         .limit(limit)
         .offset(offset);
 
@@ -180,6 +171,9 @@ export const adminRouter = router({
     .query(async ({ input }) => {
       const { limit, offset, status } = input;
       const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       let query = db
         .select()
@@ -203,6 +197,9 @@ export const adminRouter = router({
   
   getMaintenanceMode: publicProcedure.query(async () => {
     const db = await getDb();
+    if (!db) {
+      return { enabled: false };
+    }
     const setting = await db
       .select()
       .from(systemSettings)
@@ -223,6 +220,9 @@ export const adminRouter = router({
     .mutation(async ({ input }) => {
       const { enabled } = input;
       const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       await db
         .insert(systemSettings)
@@ -251,6 +251,9 @@ export const adminRouter = router({
 
   getAllSettings: requireAdmin.query(async () => {
     const db = await getDb();
+    if (!db) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    }
     const settings = await db
       .select()
       .from(systemSettings)

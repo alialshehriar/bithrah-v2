@@ -19,6 +19,7 @@ import EarlyAccessSuccess from "./pages/EarlyAccessSuccess";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import Evaluate from "./pages/Evaluate";
+import EnhancedAdminDashboard from "./pages/admin/EnhancedAdminDashboard";
 
 function Router() {
   return (
@@ -47,7 +48,8 @@ function Router() {
       
       {/* Admin routes */}
       <Route path={"/admin/login"} component={AdminLogin} />
-      <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/admin"} component={EnhancedAdminDashboard} />
+      <Route path={"/admin/old"} component={AdminDashboard} />
       <Route path={"/admin/early-access"} component={EarlyAccessAdmin} />
       
       {/* 404 - redirect to early access */}
