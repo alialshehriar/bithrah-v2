@@ -261,4 +261,110 @@ export const adminRouter = router({
 
     return settings;
   }),
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // USER MANAGEMENT (DELETE & UPDATE)
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  deleteUser: requireAdmin
+    .input(z.object({ userId: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
+
+      await db.delete(earlyAccessUsers).where(eq(earlyAccessUsers.id, input.userId));
+
+      return {
+        success: true,
+        message: 'تم حذف المستخدم بنجاح',
+      };
+    }),
+
+  updateUser: requireAdmin
+    .input(
+      z.object({
+        userId: z.number(),
+        fullName: z.string().optional(),
+        email: z.string().email().optional(),
+        username: z.string().optional(),
+        phoneNumber: z.string().optional(),
+        referralCount: z.number().optional(),
+        points: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { userId, ...updates } = input;
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
+
+      const updateData: any = {};
+      if (updates.fullName) updateData.fullName = updates.fullName;
+      if (updates.email) updateData.email = updates.email;
+      if (updates.username) updateData.username = updates.username;
+      if (updates.phoneNumber) updateData.phoneNumber = updates.phoneNumber;
+      if (updates.referralCount !== undefined) updateData.referralCount = updates.referralCount;
+      if (updates.points !== undefined) updateData.points = updates.points;
+      updateData.updatedAt = new Date();
+
+      await db.update(earlyAccessUsers).set(updateData).where(eq(earlyAccessUsers.id, userId));
+
+      return {
+        success: true,
+        message: 'تم تحديث بيانات المستخدم بنجاح',
+      };
+    }),
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // EVALUATION MANAGEMENT (DELETE & UPDATE)
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  deleteEvaluation: requireAdmin
+    .input(z.object({ ideaId: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
+
+      await db.delete(ideas).where(eq(ideas.id, input.ideaId));
+
+      return {
+        success: true,
+        message: 'تم حذف التقييم بنجاح',
+      };
+    }),
+
+  updateEvaluation: requireAdmin
+    .input(
+      z.object({
+        ideaId: z.number(),
+        evaluationStatus: z.enum(['pending', 'processing', 'completed', 'failed']).optional(),
+        evaluationSummary: z.string().optional(),
+        overallScore: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { ideaId, ...updates } = input;
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
+
+      const updateData: any = {};
+      if (updates.evaluationStatus) updateData.evaluationStatus = updates.evaluationStatus;
+      if (updates.evaluationSummary) updateData.evaluationSummary = updates.evaluationSummary;
+      if (updates.overallScore) updateData.overallScore = updates.overallScore;
+      updateData.updatedAt = new Date();
+
+      await db.update(ideas).set(updateData).where(eq(ideas.id, ideaId));
+
+      return {
+        success: true,
+        message: 'تم تحديث التقييم بنجاح',
+      };
+    }),
 });
