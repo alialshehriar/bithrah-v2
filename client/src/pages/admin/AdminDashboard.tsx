@@ -29,8 +29,14 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const [selectedTab, setSelectedTab] = useState("overview");
 
+  // Redirect if not logged in
+  if (!user) {
+    window.location.href = "/admin/login";
+    return null;
+  }
+
   // Redirect if not admin
-  if (user && user.role !== "admin") {
+  if (user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="p-8 text-center">
