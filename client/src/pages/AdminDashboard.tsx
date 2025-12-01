@@ -51,8 +51,14 @@ export default function AdminDashboard() {
   const { data: stats } = trpc.admin.getStats.useQuery(undefined, {
     enabled: authCheck?.isAuthenticated === true,
   });
-  const { data: allUsers } = trpc.admin.getAllUsers.useQuery({ limit: 1000, offset: 0 });
-  const { data: evaluationsData } = trpc.admin.getAllEvaluations.useQuery({ limit: 1000, offset: 0 });
+  const { data: allUsers } = trpc.admin.getAllUsers.useQuery(
+    { limit: 1000, offset: 0 },
+    { enabled: authCheck?.isAuthenticated === true }
+  );
+  const { data: evaluationsData } = trpc.admin.getAllEvaluations.useQuery(
+    { limit: 1000, offset: 0 },
+    { enabled: authCheck?.isAuthenticated === true }
+  );
 
   const users = allUsers || [];
 
