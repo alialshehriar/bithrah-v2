@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS idea_evaluations (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  idea_name VARCHAR(255) NOT NULL,\n  idea_description TEXT NOT NULL,\n  overall_score INT NOT NULL,\n  market_score INT NOT NULL,\n  innovation_score INT NOT NULL,\n  execution_score INT NOT NULL,\n  growth_score INT NOT NULL,\n  detailed_analysis TEXT,\n  strengths TEXT,\n  weaknesses TEXT,\n  suggestions TEXT,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  INDEX idx_created_at (created_at)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute CREATE TABLE IF NOT EXISTS idea_evaluations (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  idea_name VARCHAR(255) NOT NULL,\n  idea_description TEXT NOT NULL,\n  overall_score INT NOT NULL,\n  market_score INT NOT NULL,\n  innovation_score INT NOT NULL,\n  execution_score INT NOT NULL,\n  growth_score INT NOT NULL,\n  detailed_analysis TEXT,\n  strengths TEXT,\n  weaknesses TEXT,\n  suggestions TEXT,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  INDEX idx_created_at (created_at)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1780
+}

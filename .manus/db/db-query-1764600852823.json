@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS early_access_referrals (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  referrer_id INT NOT NULL,\n  referred_id INT NOT NULL,\n  referral_code VARCHAR(50) NOT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (referrer_id) REFERENCES early_access_users(id),\n  FOREIGN KEY (referred_id) REFERENCES early_access_users(id),\n  INDEX idx_referrer (referrer_id),\n  INDEX idx_referred (referred_id)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute CREATE TABLE IF NOT EXISTS early_access_referrals (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  referrer_id INT NOT NULL,\n  referred_id INT NOT NULL,\n  referral_code VARCHAR(50) NOT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (referrer_id) REFERENCES early_access_users(id),\n  FOREIGN KEY (referred_id) REFERENCES early_access_users(id),\n  INDEX idx_referrer (referrer_id),\n  INDEX idx_referred (referred_id)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1986
+}
