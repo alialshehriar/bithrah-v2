@@ -1,202 +1,230 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Download, Search, Users, TrendingUp, Award } from "lucide-react";
+import { Download, Search, Users, TrendingUp, Award, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import DashboardLayout from "@/components/DashboardLayout";
 
-export default function EarlyAccessAdmin() {
+export default function AdminEarlyAccess() {
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: leaderboard, isLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
-  
-  const filteredUsers = leaderboard?.filter((user: any) =>
+  // Fetch all early access users
+  const { data: users, isLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
+  const { data: stats } = trpc.earlyAccess.getStats.useQuery();
+
+  const filteredUsers = users?.filter((user: any) =>
     user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const handleExportCSV = () => {
-    if (!leaderboard || leaderboard.length === 0) {
+    user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.referralCode.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const exportToCSV = () => {
+    if (!users || users.length === 0) {
       toast.error("لا توجد بيانات للتصدير");
       return;
     }
-    
-    const headers = ["الاسم الكامل", "البريد الإلكتروني", "اسم المستخدم", "رقم الجوال", "كود الإحالة", "عدد الإحالات", "سنوات المكافأة", "المصدر", "تاريخ التسجيل"];
-    const rows = leaderboard.map((user: any) => [
+
+    const headers = ["الاسم الكامل", "اسم المستخدم", "البريد الإلكتروني", "رقم الجوال", "كود الإحالة", "عدد الإحالات", "السنوات المجانية", "المصدر", "تاريخ التسجيل"];
+    const rows = users.map((user: any) => [
       user.fullName,
-      user.email,
       user.username,
+      user.email,
       user.phone || "-",
       user.referralCode,
       user.referralCount,
       user.bonusYears,
       user.source,
-      new Date(user.createdAt).toLocaleDateString("ar-SA"),
+      new Date(user.createdAt).toLocaleDateString('ar-SA')
     ]);
-    
+
     const csvContent = [
       headers.join(","),
-      ...rows.map((row: any) => row.map((cell: any) => `"${cell}"`).join(",")),
+      ...rows.map(row => row.join(","))
     ].join("\n");
-    
+
     const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `early-access-users-${new Date().toISOString().split("T")[0]}.csv`;
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `early-access-users-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
     link.click();
-    
+    document.body.removeChild(link);
+
     toast.success("تم تصدير البيانات بنجاح!");
   };
-  
-  const stats = {
-    totalUsers: leaderboard?.length || 0,
-    totalReferrals: leaderboard?.reduce((sum: number, user: any) => sum + user.referralCount, 0) || 0,
-    topReferrer: leaderboard?.[0]?.fullName || "-",
-  };
-  
+
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">لوحة إدارة التسجيل المبكر</h1>
-          <p className="text-muted-foreground">إدارة ومتابعة المسجلين في التسجيل المبكر</p>
+          <h1 className="text-3xl font-bold">التسجيل المبكر</h1>
+          <p className="text-gray-600 mt-2">
+            إدارة المستخدمين المسجلين في التسجيل المبكر
+          </p>
         </div>
-        <Button onClick={handleExportCSV} disabled={!leaderboard || leaderboard.length === 0}>
-          <Download className="w-4 h-4 ml-2" />
-          تصدير CSV
-        </Button>
-      </div>
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المسجلين</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">مستخدم مسجل</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الإحالات</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalReferrals}</div>
-            <p className="text-xs text-muted-foreground">إحالة ناجحة</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">أفضل محيل</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold truncate">{stats.topReferrer}</div>
-            <p className="text-xs text-muted-foreground">
-              {leaderboard?.[0]?.referralCount || 0} إحالة
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle>قائمة المسجلين</CardTitle>
-          <CardDescription>بحث وعرض جميع المستخدمين المسجلين</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">إجمالي المسجلين</p>
+                <p className="text-2xl font-bold">{stats?.totalUsers || 0}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">إجمالي الإحالات</p>
+                <p className="text-2xl font-bold">{stats?.totalReferrals || 0}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">متوسط السنوات المجانية</p>
+                <p className="text-2xl font-bold">
+                  {users && users.length > 0
+                    ? (users.reduce((sum: number, u: any) => sum + u.bonusYears, 0) / users.length).toFixed(1)
+                    : 0}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">متوسط الإحالات</p>
+                <p className="text-2xl font-bold">
+                  {stats?.totalUsers && stats.totalUsers > 0
+                    ? (stats.totalReferrals / stats.totalUsers).toFixed(1)
+                    : 0}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
-              placeholder="ابحث بالاسم، البريد الإلكتروني، أو اسم المستخدم..."
+              placeholder="ابحث بالاسم، البريد الإلكتروني، اسم المستخدم، أو كود الإحالة..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pr-10"
             />
           </div>
-          
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : filteredUsers && filteredUsers.length > 0 ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>الترتيب</TableHead>
-                    <TableHead>الاسم الكامل</TableHead>
-                    <TableHead>البريد الإلكتروني</TableHead>
-                    <TableHead>اسم المستخدم</TableHead>
-                    <TableHead>رقم الجوال</TableHead>
-                    <TableHead>كود الإحالة</TableHead>
-                    <TableHead>الإحالات</TableHead>
-                    <TableHead>المكافأة</TableHead>
-                    <TableHead>المصدر</TableHead>
-                    <TableHead>تاريخ التسجيل</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+          <Button onClick={exportToCSV} disabled={!users || users.length === 0}>
+            <Download className="w-4 h-4 ml-2" />
+            تصدير إلى CSV
+          </Button>
+        </div>
+
+        {/* Users Table */}
+        <Card>
+          <div className="overflow-x-auto">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">
+                  {searchQuery ? "لا توجد نتائج" : "لا توجد مستخدمين بعد"}
+                </p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">#</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الاسم الكامل</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">اسم المستخدم</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البريد الإلكتروني</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">رقم الجوال</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">كود الإحالة</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">عدد الإحالات</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">السنوات المجانية</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المصدر</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">تاريخ التسجيل</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
                   {filteredUsers.map((user: any, index: number) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {index + 1}
-                        {index === 0 && <span className="mr-1">🥇</span>}
-                        {index === 1 && <span className="mr-1">🥈</span>}
-                        {index === 2 && <span className="mr-1">🥉</span>}
-                      </TableCell>
-                      <TableCell>{user.fullName}</TableCell>
-                      <TableCell className="font-mono text-sm">{user.email}</TableCell>
-                      <TableCell className="font-mono text-sm">{user.username}</TableCell>
-                      <TableCell>{user.phone || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono">
-                          {user.referralCode}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.referralCount > 0 ? "default" : "secondary"}>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {user.fullName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        @{user.username}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {user.phone || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-mono font-bold text-primary">
+                        {user.referralCode}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           {user.referralCount}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {user.bonusYears > 0 ? (
-                          <Badge variant="default" className="bg-green-600">
-                            {user.bonusYears} سنة
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{user.source}</Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(user.createdAt).toLocaleDateString("ar-SA")}
-                      </TableCell>
-                    </TableRow>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {user.bonusYears}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {user.source}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {new Date(user.createdAt).toLocaleDateString('ar-SA')}
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              {searchQuery ? "لا توجد نتائج للبحث" : "لا يوجد مسجلين بعد"}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                </tbody>
+              </table>
+            )}
+          </div>
+        </Card>
+
+        {/* Footer Info */}
+        <p className="text-sm text-gray-500 text-center">
+          إجمالي النتائج: {filteredUsers.length} من {users?.length || 0}
+        </p>
+      </div>
+    </DashboardLayout>
   );
 }

@@ -130,18 +130,31 @@ export default function EarlyAccess() {
 
   // tRPC queries
   const { data: stats, isLoading: statsLoading } = trpc.earlyAccess.getStats.useQuery();
-  const { data: leaderboardData, isLoading: leaderboardLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
   
-  // Extract array from tRPC response
-  const leaderboard = leaderboardData || [];
+  // Leaderboard state (using fetch instead of tRPC for now)
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   
-  // Debug leaderboard
+  // Fetch leaderboard data
   useEffect(() => {
-    console.log('[Leaderboard Debug] Loading:', leaderboardLoading);
-    console.log('[Leaderboard Debug] Raw Data:', leaderboardData);
-    console.log('[Leaderboard Debug] Processed:', leaderboard);
-    console.log('[Leaderboard Debug] Length:', leaderboard?.length);
-  }, [leaderboardData, leaderboardLoading]);
+    const fetchLeaderboard = async () => {
+      try {
+        setLeaderboardLoading(true);
+        const response = await fetch('/api/trpc/earlyAccess.getLeaderboard');
+        const data = await response.json();
+        const users = data.result.data.json;
+        setLeaderboard(users);
+        console.log('[Leaderboard] Loaded:', users.length, 'users');
+      } catch (error) {
+        console.error('[Leaderboard] Error:', error);
+        setLeaderboard([]);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+    
+    fetchLeaderboard();
+  }, []);
   const registerMutation = trpc.earlyAccess.register.useMutation();
   const evaluateMutation = trpc.ideas.quickEvaluate.useMutation();
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
@@ -600,7 +613,7 @@ export default function EarlyAccess() {
                     <div className="flex justify-center items-center py-12">
                       <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
-                  ) : !leaderboard || leaderboard.length === 0 ? (
+                  ) : !leaderboard || !Array.isArray(leaderboard) || leaderboard.length === 0 ? (
                     <div className="text-center py-12">
                       <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500">لا توجد بيانات بعد</p>
