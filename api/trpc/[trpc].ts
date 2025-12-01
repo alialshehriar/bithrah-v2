@@ -1,52 +1,70 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '../../server/routers';
-import { createContext } from '../../server/_core/context';
+import { sdk } from '../../server/_core/sdk';
+import type { User } from '../../drizzle/schema';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Build full URL
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers.host || req.headers['x-forwarded-host'];
-  const url = `${protocol}://${host}${req.url}`;
-
-  // Convert Vercel request to Fetch API Request
-  const fetchRequest = new Request(url, {
-    method: req.method,
-    headers: new Headers(req.headers as HeadersInit),
-    body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
-  });
+  // Only handle POST requests for tRPC
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   try {
-    const fetchResponse = await fetchRequestHandler({
-      endpoint: '/api/trpc',
-      req: fetchRequest,
-      router: appRouter,
-      createContext: async () => {
-        // Create Express-like request object for context
-        return createContext({ 
-          req: req as any, 
-          res: res as any 
-        });
-      },
-    });
+    // Get user from session
+    let user: User | null = null;
+    try {
+      // Create minimal Express-like request for authentication
+      const expressLikeReq = {
+        headers: req.headers,
+        cookies: req.cookies || {},
+      };
+      user = await sdk.authenticateRequest(expressLikeReq as any);
+    } catch (error) {
+      user = null;
+    }
 
-    // Convert Fetch Response to Vercel Response
-    res.status(fetchResponse.status);
+    // Create context
+    const ctx = {
+      req: req as any,
+      res: res as any,
+      user,
+    };
+
+    // Get procedure path from URL
+    const url = new URL(req.url || '', `https://${req.headers.host}`);
+    const pathParts = url.pathname.split('/api/trpc/')[1]?.split('.');
     
-    // Copy headers
-    fetchResponse.headers.forEach((value, key) => {
-      res.setHeader(key, value);
-    });
+    if (!pathParts || pathParts.length < 2) {
+      res.status(400).json({ error: 'Invalid procedure path' });
+      return;
+    }
+
+    const [routerName, procedureName] = pathParts;
     
-    // Send body
-    const body = await fetchResponse.text();
-    res.send(body);
-  } catch (error) {
+    // Get the router
+    const router = (appRouter as any)._def.procedures;
+    const procedureKey = `${routerName}.${procedureName}`;
+    const procedure = router[procedureKey];
+
+    if (!procedure) {
+      res.status(404).json({ error: 'Procedure not found' });
+      return;
+    }
+
+    // Execute procedure
+    const input = req.body?.[0]?.json || req.body;
+    const result = await procedure({ ctx, input, path: procedureKey, type: 'mutation' });
+
+    res.status(200).json([{ result: { data: result } }]);
+  } catch (error: any) {
     console.error('tRPC handler error:', error);
-    res.status(500).json({ 
-      error: 'Internal server error', 
-      details: process.env.NODE_ENV === 'development' ? String(error) : undefined 
-    });
+    res.status(500).json([{ 
+      error: { 
+        message: error.message || 'Internal server error',
+        code: error.code || 'INTERNAL_SERVER_ERROR'
+      } 
+    }]);
   }
 }
