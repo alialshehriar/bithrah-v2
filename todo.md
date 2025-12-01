@@ -889,3 +889,13 @@
 2. التحقق من OPENAI_API_KEY في Vercel Environment Variables
 3. التحقق من GitHub webhook في Vercel
 4. اختبار نظام التقييم بعد النشر
+
+
+## 🚨 مهمة عاجلة: إصلاح نظام التقييم
+
+- [ ] فحص ideas router وquickEvaluate procedure
+- [ ] التحقق من OPENAI_API_KEY في production
+- [ ] إصلاح API endpoint
+- [ ] اختبار محلياً
+- [ ] نشر على Vercel
+- [ ] اختبار على bithrahapp.com
