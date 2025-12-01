@@ -36,18 +36,14 @@ export default function AdminDashboard() {
   const [showReferralsDialog, setShowReferralsDialog] = useState(false);
   
   // Fetch stats
-  const { data: stats } = trpc.earlyAccess.getStats.useQuery();
-  const { data: leaderboard } = trpc.earlyAccess.getLeaderboard.useQuery();
-  const { data: allUsersData } = trpc.earlyAccess.getAllUsers.useQuery({
-    page: 1,
-    limit: 1000,
-    search: searchTerm,
-  });
+  const { data: stats } = trpc.admin.getStats.useQuery();
+  const { data: allUsers } = trpc.admin.getAllUsers.useQuery({ limit: 1000, offset: 0 });
+  const { data: evaluationsData } = trpc.admin.getAllEvaluations.useQuery({ limit: 1000, offset: 0 });
 
-  const allUsers = allUsersData?.users || [];
+  const users = allUsers || [];
 
   // Filter users based on search
-  const filteredUsers = allUsers.filter(
+  const filteredUsers = users.filter(
     (user: any) =>
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,17 +52,20 @@ export default function AdminDashboard() {
 
   // Prepare chart data
   const referralDistribution = [
-    { name: '0 إحالات', value: allUsers.filter((u: any) => u.referralCount === 0).length },
-    { name: '1-4 إحالات', value: allUsers.filter((u: any) => u.referralCount >= 1 && u.referralCount <= 4).length },
-    { name: '5-9 إحالات', value: allUsers.filter((u: any) => u.referralCount >= 5 && u.referralCount <= 9).length },
-    { name: '10+ إحالات', value: allUsers.filter((u: any) => u.referralCount >= 10).length },
+    { name: '0 إحالات', value: users.filter((u: any) => u.referralCount === 0).length },
+    { name: '1-4 إحالات', value: users.filter((u: any) => u.referralCount >= 1 && u.referralCount <= 4).length },
+    { name: '5-9 إحالات', value: users.filter((u: any) => u.referralCount >= 5 && u.referralCount <= 9).length },
+    { name: '10+ إحالات', value: users.filter((u: any) => u.referralCount >= 10).length },
   ];
 
-  const topReferrers = leaderboard?.slice(0, 10).map((user: any) => ({
-    name: user.fullName,
-    referrals: user.referralCount,
-    bonusYears: user.bonusYears,
-  })) || [];
+  const topReferrers = users
+    .sort((a: any, b: any) => b.referralCount - a.referralCount)
+    .slice(0, 10)
+    .map((user: any) => ({
+      name: user.fullName,
+      referrals: user.referralCount,
+      bonusYears: user.bonusYears,
+    }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8" dir="rtl">
