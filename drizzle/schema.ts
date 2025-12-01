@@ -809,7 +809,7 @@ export const notifications = pgTable(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const earlyAccessUsers = pgTable(
-  "earlyAccessUsers",
+  "early_access_users",
   {
     id: serial("id").primaryKey(),
     fullName: text("fullName").notNull(),
@@ -832,7 +832,7 @@ export const earlyAccessUsers = pgTable(
 );
 
 export const earlyAccessReferrals = pgTable(
-  "earlyAccessReferrals",
+  "early_access_referrals",
   {
     id: serial("id").primaryKey(),
     referrerId: integer("referrerId").notNull().references(() => earlyAccessUsers.id, { onDelete: "cascade" }),
