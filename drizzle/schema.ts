@@ -32,6 +32,17 @@ export const reportReasonEnum = pgEnum("reportReason", ["spam", "harassment", "i
 export const reportStatusEnum = pgEnum("reportStatus", ["pending", "reviewed", "action_taken", "dismissed"]);
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const settingTypeEnum = pgEnum("settingType", ["text", "boolean", "number", "json"]);
+
+// System Settings Table
+export const systemSettings = pgTable("systemSettings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  type: settingTypeEnum("type").default("text").notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
+});
 export const snapshotTypeEnum = pgEnum("snapshotType", ["daily", "weekly", "monthly", "all_time"]);
 export const subscriptionTierEnum = pgEnum("subscriptionTier", ["free", "silver", "gold", "platinum"]);
 export const transactionTypeEnum = pgEnum("transactionType", ["credit", "debit", "commission", "withdrawal"]);
