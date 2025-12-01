@@ -102,15 +102,17 @@ export const ideasRouter = router({
 
         return {
           evaluationSummary: evaluation.evaluationSummary,
+          leanCanvas: evaluation.leanCanvas,
+          financialProjection: evaluation.financialProjection,
+          executionRoadmap: evaluation.executionRoadmap,
           strengths: evaluation.strengths,
           weaknesses: evaluation.weaknesses,
-          risks: evaluation.risks,
-          feasibilityOpinion: evaluation.feasibilityOpinion,
-          strategicAnalysis: evaluation.strategicAnalysis,
-          financialAnalysis: evaluation.financialAnalysis,
+          opportunities: evaluation.opportunities,
+          threats: evaluation.threats,
           marketAnalysis: evaluation.marketAnalysis,
-          executionAnalysis: evaluation.executionAnalysis,
-          growthStrategy: evaluation.growthStrategy,
+          competitiveAnalysis: evaluation.competitiveAnalysis,
+          riskAssessment: evaluation.riskAssessment,
+          recommendations: evaluation.recommendations,
           scores: {
             overall: evaluation.overallScore,
             feasibility: evaluation.feasibilityScore,

@@ -1,8 +1,7 @@
 /**
- * AI Evaluation System for Bithrah Platform
+ * AI Evaluation System for Bithrah Platform - Lean Canvas Model
  * 
- * This module contains carefully engineered prompts for evaluating business ideas
- * across multiple dimensions using AI analysis.
+ * Uses Lean Canvas framework for efficient and comprehensive idea evaluation
  */
 
 export interface IdeaInput {
@@ -17,23 +16,56 @@ export interface IdeaInput {
   competitiveAdvantage?: string;
 }
 
+export interface LeanCanvasAnalysis {
+  problem: string[];           // 3 main problems
+  solution: string[];          // 3 key solutions
+  uniqueValue: string;         // Unique value proposition
+  unfairAdvantage: string;     // Competitive advantage
+  customerSegments: string[];  // Target customer segments
+  channels: string[];          // Marketing/distribution channels
+  revenueStreams: string[];    // Revenue sources
+  costStructure: string[];     // Main cost categories
+  keyMetrics: string[];        // KPIs to track
+}
+
+export interface FinancialProjection {
+  initialCost: string;         // Estimated startup cost
+  yearOneRevenue: string;      // First year revenue projection
+  breakEvenPoint: string;      // When to break even
+  fundingNeeded: string;       // Required funding
+}
+
+export interface ExecutionRoadmap {
+  phase1: { title: string; duration: string; tasks: string[] };
+  phase2: { title: string; duration: string; tasks: string[] };
+  phase3: { title: string; duration: string; tasks: string[] };
+}
+
 export interface EvaluationResult {
   // Overall
   overallScore: number; // 0-100
   evaluationSummary: string;
   
-  // Strengths, Weaknesses, Risks
+  // Lean Canvas Analysis
+  leanCanvas: LeanCanvasAnalysis;
+  
+  // Financial Analysis
+  financialProjection: FinancialProjection;
+  
+  // Execution Plan
+  executionRoadmap: ExecutionRoadmap;
+  
+  // SWOT (simplified)
   strengths: string[];
   weaknesses: string[];
-  risks: string[];
+  opportunities: string[];
+  threats: string[];
   
   // Detailed Analysis
-  feasibilityOpinion: string;
-  strategicAnalysis: string;
-  financialAnalysis: string;
   marketAnalysis: string;
-  executionAnalysis: string;
-  growthStrategy: string;
+  competitiveAnalysis: string;
+  riskAssessment: string;
+  recommendations: string[];
   
   // Scores by dimension
   feasibilityScore: number; // 0-100
@@ -44,121 +76,236 @@ export interface EvaluationResult {
 }
 
 /**
- * System prompt that sets the context for the AI evaluator
+ * System prompt using Lean Canvas methodology
  */
-export const SYSTEM_PROMPT = `أنت خبير تقييم مشاريع ريادية متخصص في السوق السعودي والخليجي. مهمتك تقييم الأفكار الريادية بشكل موضوعي وشامل.
+export const SYSTEM_PROMPT = `أنت خبير تقييم مشاريع ريادية متخصص في السوق السعودي والخليجي. تستخدم منهجية Lean Canvas لتقييم الأفكار الريادية بشكل عملي وشامل.
 
-**معايير التقييم:**
-1. الجدوى الفنية (20 نقطة): قابلية التنفيذ تقنياً، توفر الموارد، التعقيد التقني
-2. تحليل السوق (25 نقطة): حجم السوق، الطلب، المنافسة، الميزة التنافسية
-3. الجدوى المالية (20 نقطة): نموذج الربح، التكاليف، العائد المتوقع
-4. القدرة على التنفيذ (20 نقطة): الفريق، الخطة، الموارد، الجدول الزمني
-5. استراتيجية النمو (15 نقطة): قابلية التوسع، الاستدامة، الرؤية طويلة المدى
+**منهجية التقييم:**
+1. تحليل Lean Canvas الكامل (9 عناصر)
+2. تحليل SWOT مبسط
+3. توقعات مالية واقعية
+4. خارطة طريق تنفيذية (6 أشهر)
+5. تقييم المخاطر والفرص
+
+**معايير الدرجات:**
+- الجدوى الفنية (20%): قابلية التنفيذ والموارد
+- السوق (25%): حجم السوق والطلب والمنافسة
+- المالية (20%): نموذج الربح والتكاليف
+- التنفيذ (20%): الخطة والفريق والموارد
+- النمو (15%): قابلية التوسع والاستدامة
 
 **أسلوب التقييم:**
-- كن موضوعياً ومحايداً
-- قدم تحليلاً عميقاً مبنياً على البيانات المقدمة
-- اذكر نقاط القوة والضعف بوضوح
-- قدم توصيات عملية قابلة للتنفيذ
-- استخدم لغة عربية فصحى واضحة ومهنية`;
+- موضوعي ومبني على البيانات
+- عملي وقابل للتطبيق
+- واضح ومباشر
+- يركز على القيمة الفريدة والميزة التنافسية`;
 
 /**
- * Main evaluation prompt that requests comprehensive analysis
+ * Main evaluation prompt using Lean Canvas
  */
 export function buildEvaluationPrompt(idea: IdeaInput): string {
-  return `قم بتقييم الفكرة الريادية التالية بشكل شامل:
+  return `قم بتقييم الفكرة الريادية التالية باستخدام منهجية Lean Canvas:
 
 **معلومات الفكرة:**
 - الاسم: ${idea.ideaName}
 - الوصف: ${idea.ideaDescription}
 ${idea.sector ? `- القطاع: ${idea.sector}` : ''}
-${idea.category ? `- الفئة: ${idea.category}` : ''}
-${idea.stage ? `- المرحلة: ${idea.stage}` : ''}
 ${idea.targetMarket ? `- السوق المستهدف: ${idea.targetMarket}` : ''}
 ${idea.competitiveAdvantage ? `- الميزة التنافسية: ${idea.competitiveAdvantage}` : ''}
 ${idea.technicalNeeds ? `- الاحتياجات التقنية: ${idea.technicalNeeds}` : ''}
 ${idea.financialNeeds ? `- الاحتياجات المالية: ${idea.financialNeeds}` : ''}
 
 **المطلوب:**
-قدم تقييماً شاملاً يتضمن:
 
-1. **ملخص التقييم** (فقرة واحدة): نظرة عامة على الفكرة وجدواها
+1. **ملخص التقييم** (فقرتان): نظرة عامة على الفكرة وجدواها وإمكانية نجاحها
 
-2. **نقاط القوة** (3-5 نقاط): ما يميز هذه الفكرة
+2. **تحليل Lean Canvas:**
+   - المشكلة: 3 مشاكل رئيسية يحلها المشروع
+   - الحل: 3 حلول رئيسية يقدمها
+   - القيمة الفريدة: جملة واحدة تلخص القيمة
+   - الميزة التنافسية: ما يميزك عن المنافسين
+   - شرائح العملاء: 2-3 شرائح مستهدفة
+   - القنوات: 3-4 قنوات تسويق/توزيع
+   - مصادر الدخل: 2-3 مصادر دخل محتملة
+   - هيكل التكاليف: 3-4 بنود تكلفة رئيسية
+   - المقاييس الرئيسية: 3-4 KPIs لقياس النجاح
 
-3. **نقاط الضعف** (3-5 نقاط): التحديات والمشاكل المحتملة
+3. **التوقعات المالية:**
+   - التكلفة الأولية: رقم تقديري بالريال
+   - الإيرادات المتوقعة (السنة الأولى): رقم تقديري
+   - نقطة التعادل: متى يتوقع تحقيقها
+   - التمويل المطلوب: المبلغ المقترح
 
-4. **المخاطر** (3-5 نقاط): المخاطر الرئيسية التي قد تواجه المشروع
+4. **خارطة الطريق (6 أشهر):**
+   - المرحلة 1 (شهر 1-2): العنوان، المدة، 3-4 مهام
+   - المرحلة 2 (شهر 3-4): العنوان، المدة، 3-4 مهام
+   - المرحلة 3 (شهر 5-6): العنوان، المدة، 3-4 مهام
 
-5. **الجدوى الفنية** (فقرة): تحليل قابلية التنفيذ تقنياً ومدى توفر الموارد والتقنيات المطلوبة
+5. **تحليل SWOT:**
+   - نقاط القوة: 3-4 نقاط
+   - نقاط الضعف: 3-4 نقاط
+   - الفرص: 3-4 فرص
+   - التهديدات: 3-4 تهديدات
 
-6. **تحليل السوق** (فقرة): تحليل حجم السوق، الطلب، المنافسة، والفرص المتاحة
+6. **التحليلات:**
+   - تحليل السوق: فقرة واحدة (حجم السوق، الطلب، الاتجاهات)
+   - تحليل المنافسة: فقرة واحدة (المنافسون الرئيسيون، موقعك)
+   - تقييم المخاطر: فقرة واحدة (المخاطر الرئيسية وكيفية التعامل معها)
 
-7. **الجدوى المالية** (فقرة): تحليل نموذج الربح، التكاليف المتوقعة، والعائد على الاستثمار
+7. **التوصيات:** 4-5 توصيات عملية قابلة للتطبيق
 
-8. **القدرة على التنفيذ** (فقرة): تقييم الخطة، الموارد المطلوبة، والجدول الزمني
+8. **الدرجات:**
+   - الدرجة الإجمالية (من 100)
+   - درجة الجدوى الفنية (من 100)
+   - درجة السوق (من 100)
+   - درجة الجدوى المالية (من 100)
+   - درجة القدرة على التنفيذ (من 100)
+   - درجة استراتيجية النمو (من 100)
 
-9. **استراتيجية النمو** (فقرة): تحليل قابلية التوسع والاستدامة والرؤية المستقبلية
-
-10. **الدرجات:**
-- الدرجة الإجمالية (من 100)
-- درجة الجدوى الفنية (من 100)
-- درجة السوق (من 100)
-- درجة الجدوى المالية (من 100)
-- درجة القدرة على التنفيذ (من 100)
-- درجة استراتيجية النمو (من 100)
-
-**ملاحظة:** كن واقعياً في التقييم. الدرجات العالية (80+) تُعطى فقط للأفكار الاستثنائية.`;
+**ملاحظات:**
+- كن واقعياً في الأرقام المالية
+- الدرجات 70-79 = جيد، 80-89 = ممتاز، 90+ = استثنائي
+- ركز على القيمة العملية والقابلية للتنفيذ`;
 }
 
 /**
- * JSON schema for structured output from the AI
+ * JSON schema for structured Lean Canvas output
  */
 export const EVALUATION_SCHEMA = {
   type: "object",
   properties: {
     evaluationSummary: {
       type: "string",
-      description: "ملخص شامل للتقييم في فقرة واحدة"
+      description: "ملخص شامل للتقييم في فقرتين"
+    },
+    leanCanvas: {
+      type: "object",
+      properties: {
+        problem: {
+          type: "array",
+          items: { type: "string" },
+          description: "3 مشاكل رئيسية"
+        },
+        solution: {
+          type: "array",
+          items: { type: "string" },
+          description: "3 حلول رئيسية"
+        },
+        uniqueValue: {
+          type: "string",
+          description: "القيمة الفريدة في جملة واحدة"
+        },
+        unfairAdvantage: {
+          type: "string",
+          description: "الميزة التنافسية"
+        },
+        customerSegments: {
+          type: "array",
+          items: { type: "string" },
+          description: "2-3 شرائح عملاء"
+        },
+        channels: {
+          type: "array",
+          items: { type: "string" },
+          description: "3-4 قنوات تسويق"
+        },
+        revenueStreams: {
+          type: "array",
+          items: { type: "string" },
+          description: "2-3 مصادر دخل"
+        },
+        costStructure: {
+          type: "array",
+          items: { type: "string" },
+          description: "3-4 بنود تكلفة"
+        },
+        keyMetrics: {
+          type: "array",
+          items: { type: "string" },
+          description: "3-4 مقاييس نجاح"
+        }
+      },
+      required: ["problem", "solution", "uniqueValue", "unfairAdvantage", "customerSegments", "channels", "revenueStreams", "costStructure", "keyMetrics"]
+    },
+    financialProjection: {
+      type: "object",
+      properties: {
+        initialCost: { type: "string", description: "التكلفة الأولية بالريال" },
+        yearOneRevenue: { type: "string", description: "إيرادات السنة الأولى" },
+        breakEvenPoint: { type: "string", description: "نقطة التعادل" },
+        fundingNeeded: { type: "string", description: "التمويل المطلوب" }
+      },
+      required: ["initialCost", "yearOneRevenue", "breakEvenPoint", "fundingNeeded"]
+    },
+    executionRoadmap: {
+      type: "object",
+      properties: {
+        phase1: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            duration: { type: "string" },
+            tasks: { type: "array", items: { type: "string" } }
+          },
+          required: ["title", "duration", "tasks"]
+        },
+        phase2: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            duration: { type: "string" },
+            tasks: { type: "array", items: { type: "string" } }
+          },
+          required: ["title", "duration", "tasks"]
+        },
+        phase3: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            duration: { type: "string" },
+            tasks: { type: "array", items: { type: "string" } }
+          },
+          required: ["title", "duration", "tasks"]
+        }
+      },
+      required: ["phase1", "phase2", "phase3"]
     },
     strengths: {
       type: "array",
-      description: "قائمة نقاط القوة (3-5 نقاط)",
-      items: { type: "string" }
+      items: { type: "string" },
+      description: "3-4 نقاط قوة"
     },
     weaknesses: {
       type: "array",
-      description: "قائمة نقاط الضعف (3-5 نقاط)",
-      items: { type: "string" }
+      items: { type: "string" },
+      description: "3-4 نقاط ضعف"
     },
-    risks: {
+    opportunities: {
       type: "array",
-      description: "قائمة المخاطر الرئيسية (3-5 نقاط)",
-      items: { type: "string" }
+      items: { type: "string" },
+      description: "3-4 فرص"
     },
-    feasibilityOpinion: {
-      type: "string",
-      description: "تحليل الجدوى الفنية في فقرة واحدة"
+    threats: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-4 تهديدات"
     },
     marketAnalysis: {
       type: "string",
-      description: "تحليل السوق في فقرة واحدة"
+      description: "تحليل السوق في فقرة"
     },
-    financialAnalysis: {
+    competitiveAnalysis: {
       type: "string",
-      description: "تحليل الجدوى المالية في فقرة واحدة"
+      description: "تحليل المنافسة في فقرة"
     },
-    executionAnalysis: {
+    riskAssessment: {
       type: "string",
-      description: "تحليل القدرة على التنفيذ في فقرة واحدة"
+      description: "تقييم المخاطر في فقرة"
     },
-    growthStrategy: {
-      type: "string",
-      description: "تحليل استراتيجية النمو في فقرة واحدة"
-    },
-    strategicAnalysis: {
-      type: "string",
-      description: "التحليل الاستراتيجي الشامل في فقرة واحدة"
+    recommendations: {
+      type: "array",
+      items: { type: "string" },
+      description: "4-5 توصيات عملية"
     },
     overallScore: {
       type: "integer",
@@ -187,15 +334,17 @@ export const EVALUATION_SCHEMA = {
   },
   required: [
     "evaluationSummary",
+    "leanCanvas",
+    "financialProjection",
+    "executionRoadmap",
     "strengths",
     "weaknesses",
-    "risks",
-    "feasibilityOpinion",
+    "opportunities",
+    "threats",
     "marketAnalysis",
-    "financialAnalysis",
-    "executionAnalysis",
-    "growthStrategy",
-    "strategicAnalysis",
+    "competitiveAnalysis",
+    "riskAssessment",
+    "recommendations",
     "overallScore",
     "feasibilityScore",
     "marketScore",
