@@ -45,7 +45,7 @@ export const ideasRouter = router({
   quickEvaluate: publicProcedure
     .input(
       z.object({
-        ideaName: z.string().min(3),
+        ideaName: z.string().min(3).default("فكرة جديدة"),
         ideaDescription: z.string().min(10),
         sector: z.string().optional(),
         targetMarket: z.string().optional(),
@@ -55,10 +55,10 @@ export const ideasRouter = router({
       try {
         // Prepare idea input for evaluation
         const ideaInput: IdeaInput = {
-          ideaName: input.ideaName,
+          ideaName: input.ideaName || "فكرة جديدة",
           ideaDescription: input.ideaDescription,
-          sector: input.sector,
-          targetMarket: input.targetMarket,
+          sector: input.sector || "عام",
+          targetMarket: input.targetMarket || "السوق السعودي",
         };
 
         // Build evaluation prompt
