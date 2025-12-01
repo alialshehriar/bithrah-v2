@@ -260,9 +260,9 @@ export default function MarketerDashboard() {
                   نسب العمولات
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-700">
-                  <li>• <strong>عمولة أساسية:</strong> 2% من قيمة الصفقة</li>
-                  <li>• <strong>عمولة بلس:</strong> 3% من قيمة الصفقة (للمشاريع المميزة)</li>
-                  <li>• <strong>عمولة المسوّق:</strong> 5% من قيمة الصفقة (للمسوقين المعتمدين)</li>
+                  <li>• <strong>عمولة أساسية:</strong> على المشاريع العادية</li>
+                  <li>• <strong>عمولة بلس:</strong> على المشاريع المميزة</li>
+                  <li>• <strong>عمولة المسوّق:</strong> على المشاريع التي تسوق لها</li>
                 </ul>
               </div>
             </Card>
@@ -303,7 +303,7 @@ export default function MarketerDashboard() {
                               +{commission.amount.toLocaleString()} ريال
                             </p>
                             <p className="text-xs text-gray-500">
-                              {commission.percentage}% عمولة
+                              عمولة
                             </p>
                           </div>
                         </div>
@@ -346,7 +346,6 @@ export default function MarketerDashboard() {
                         <TableHead>المشروع</TableHead>
                         <TableHead>العميل</TableHead>
                         <TableHead>المبلغ</TableHead>
-                        <TableHead>النسبة</TableHead>
                         <TableHead>الحالة</TableHead>
                         <TableHead>التاريخ</TableHead>
                       </TableRow>
@@ -361,7 +360,6 @@ export default function MarketerDashboard() {
                           <TableCell className="font-bold text-green-600">
                             {commission.amount.toLocaleString()} ريال
                           </TableCell>
-                          <TableCell>{commission.percentage}%</TableCell>
                           <TableCell>{getStatusBadge(commission.status)}</TableCell>
                           <TableCell>
                             {new Date(commission.date).toLocaleDateString("ar-SA")}

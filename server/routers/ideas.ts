@@ -81,9 +81,24 @@ export const ideasRouter = router({
         });
 
         const content = response.choices[0].message.content;
-        const evaluation: EvaluationResult = JSON.parse(
-          typeof content === "string" ? content : "{}"
-        );
+        
+        // Log for debugging
+        console.log("AI Response:", content);
+        
+        if (!content) {
+          throw new Error("AI returned empty response");
+        }
+        
+        let evaluation: EvaluationResult;
+        try {
+          evaluation = JSON.parse(
+            typeof content === "string" ? content : JSON.stringify(content)
+          );
+        } catch (parseError) {
+          console.error("JSON Parse Error:", parseError);
+          console.error("Content:", content);
+          throw new Error("Failed to parse AI response");
+        }
 
         return {
           evaluationSummary: evaluation.evaluationSummary,
@@ -162,9 +177,24 @@ export const ideasRouter = router({
         });
 
         const content = response.choices[0].message.content;
-        const evaluation: EvaluationResult = JSON.parse(
-          typeof content === "string" ? content : "{}"
-        );
+        
+        // Log for debugging
+        console.log("AI Response:", content);
+        
+        if (!content) {
+          throw new Error("AI returned empty response");
+        }
+        
+        let evaluation: EvaluationResult;
+        try {
+          evaluation = JSON.parse(
+            typeof content === "string" ? content : JSON.stringify(content)
+          );
+        } catch (parseError) {
+          console.error("JSON Parse Error:", parseError);
+          console.error("Content:", content);
+          throw new Error("Failed to parse AI response");
+        }
 
         // Convert arrays to strings for database storage
         const strengthsText = evaluation.strengths.join("\n• ");

@@ -115,13 +115,10 @@ export default function Terms() {
             بذره تحصل على عمولة من:
           </p>
           <ul className="list-disc list-inside space-y-2 mr-6">
-            <li><strong>باقات الدعم:</strong> نسبة من كل باقة دعم يتم شراؤها</li>
+            <li><strong>باقات الدعم:</strong> عمولة على باقات الدعم المجموعة</li>
             <li><strong>باقة المستثمر:</strong> رسوم اشتراك شهرية أو سنوية</li>
-            <li><strong>عمولات التسويق:</strong> نسبة من عمولات المسوقين</li>
+            <li><strong>عمولات التسويق:</strong> عمولة على عمليات التسويق الناجحة</li>
           </ul>
-          <p className="text-sm text-muted-foreground">
-            العمولات الدقيقة يتم توضيحها في صفحة كل مشروع وباقة.
-          </p>
         </CardContent>
       </Card>
 
