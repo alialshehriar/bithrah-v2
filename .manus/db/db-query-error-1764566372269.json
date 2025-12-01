@@ -1,0 +1,14 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS \"earlyAccessReferrals\" (\n  \"id\" SERIAL PRIMARY KEY,\n  \"referrerId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,\n  \"referredId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,\n  \"referralCode\" TEXT NOT NULL,\n  \"createdAt\" TIMESTAMP DEFAULT NOW() NOT NULL\n);\n\nCREATE INDEX IF NOT EXISTS \"early_access_referrals_referrer_id_idx\" ON \"earlyAccessReferrals\"(\"referrerId\");\nCREATE INDEX IF NOT EXISTS \"early_access_referrals_referred_id_idx\" ON \"earlyAccessReferrals\"(\"referredId\");",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute CREATE TABLE IF NOT EXISTS \"earlyAccessReferrals\" (\n  \"id\" SERIAL PRIMARY KEY,\n  \"referrerId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,\n  \"referredId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,\n  \"referralCode\" TEXT NOT NULL,\n  \"createdAt\" TIMESTAMP DEFAULT NOW() NOT NULL\n);\n\nCREATE INDEX IF NOT EXISTS \"early_access_referrals_referrer_id_idx\" ON \"earlyAccessReferrals\"(\"referrerId\");\nCREATE INDEX IF NOT EXISTS \"early_access_referrals_referred_id_idx\" ON \"earlyAccessReferrals\"(\"referredId\");",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 49 near \"\"earlyAccessReferrals\" (",
+    "  \"id\" SERIAL PRIMARY KEY,",
+    "  \"referrerId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,",
+    "  \"referredId\" INTEGER NOT NULL REFERENCES \"earlyAccessUsers\"(\"id\") ON DELETE CASCADE,",
+    "  \"referralCode\" TEXT NOT NULL,",
+    "  \"createdAt\" TIMESTAMP DEFAULT NOW() NOT NULL",
+    ")\""
+  ]
+}

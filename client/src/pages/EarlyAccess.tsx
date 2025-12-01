@@ -130,7 +130,18 @@ export default function EarlyAccess() {
 
   // tRPC queries
   const { data: stats, isLoading: statsLoading } = trpc.earlyAccess.getStats.useQuery();
-  const { data: leaderboard, isLoading: leaderboardLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
+  const { data: leaderboardData, isLoading: leaderboardLoading } = trpc.earlyAccess.getLeaderboard.useQuery();
+  
+  // Extract array from tRPC response
+  const leaderboard = leaderboardData || [];
+  
+  // Debug leaderboard
+  useEffect(() => {
+    console.log('[Leaderboard Debug] Loading:', leaderboardLoading);
+    console.log('[Leaderboard Debug] Raw Data:', leaderboardData);
+    console.log('[Leaderboard Debug] Processed:', leaderboard);
+    console.log('[Leaderboard Debug] Length:', leaderboard?.length);
+  }, [leaderboardData, leaderboardLoading]);
   const registerMutation = trpc.earlyAccess.register.useMutation();
   const evaluateMutation = trpc.ideas.quickEvaluate.useMutation();
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
@@ -599,30 +610,30 @@ export default function EarlyAccess() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {leaderboard.map((user: any) => (
+                      {leaderboard.map((user: any, index: number) => (
                         <div
-                          key={user.rank}
+                          key={user.id}
                           className="flex items-center justify-between p-4 rounded-lg border hover:shadow-md transition-shadow"
                         >
                           <div className="flex items-center gap-4">
                             <div className="w-12 text-center">
-                              {getRankBadge(user.rank)}
+                              {getRankBadge(index + 1)}
                             </div>
                             <div>
-                              <p className="font-bold">{user.name}</p>
-                              <p className="text-sm text-gray-600">{user.batch}</p>
+                              <p className="font-bold">{user.fullName}</p>
+                              <p className="text-sm text-gray-600">@{user.username}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-6">
                             <div className="text-center">
                               <p className="text-2xl font-bold text-blue-600">
-                                {user.referrals}
+                                {user.referralCount}
                               </p>
                               <p className="text-xs text-gray-600">إحالات</p>
                             </div>
                             <div className="text-center">
                               <p className="text-2xl font-bold text-yellow-600">
-                                {user.points}
+                                {user.referralCount * 50}
                               </p>
                               <p className="text-xs text-gray-600">نقطة</p>
                             </div>

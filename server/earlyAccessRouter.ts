@@ -63,6 +63,8 @@ export const earlyAccessRouter = router({
       }
 
       // Create early access user
+      console.log("[EarlyAccess] Creating user:", { fullName: input.fullName, email: input.email, username: input.username });
+      
       const [newUser] = await db
         .insert(earlyAccessUsers)
         .values({
@@ -77,6 +79,8 @@ export const earlyAccessRouter = router({
           bonusYears: 1,
         })
         .returning();
+      
+      console.log("[EarlyAccess] ✅ User created successfully:", { id: newUser.id, username: newUser.username, referralCode: newUser.referralCode });
 
       // If referred by someone, create referral record and update referrer
       if (input.referralCode) {
@@ -162,12 +166,8 @@ export const earlyAccessRouter = router({
       };
     }),
 
-  // Get stats for admin dashboard
-  getStats: protectedProcedure.query(async ({ ctx }: { ctx: any }) => {
-    // Only allow admin users
-    if (ctx.user.role !== "admin") {
-      throw new Error("Unauthorized");
-    }
+  // Get stats for admin dashboard (and public early access page)
+  getStats: publicProcedure.query(async () => {
 
     const db = await getDb();
     if (!db) throw new Error("Database connection failed");
