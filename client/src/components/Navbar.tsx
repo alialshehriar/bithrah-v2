@@ -13,7 +13,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "الرئيسية", icon: Home },
-    { href: "/early-access#evaluate", label: "قيّم فكرتك", icon: Lightbulb },
+    { href: "/evaluate", label: "قيّم فكرتك", icon: Lightbulb },
   ];
 
   return (
