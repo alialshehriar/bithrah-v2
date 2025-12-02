@@ -40,13 +40,18 @@ export const adminRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { username, password } = input;
 
+      console.log('[AdminLogin] Login attempt:', { username, passwordLength: password.length });
+
       // Verify credentials
       if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+        console.log('[AdminLogin] Login failed: Invalid credentials');
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
         });
       }
+
+      console.log('[AdminLogin] Login successful');
 
       // Set session cookie
       if (ctx.res) {

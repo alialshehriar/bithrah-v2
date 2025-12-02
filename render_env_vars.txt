@@ -1,0 +1,45 @@
+قائمة Environment Variables الموجودة على Render (production):
+
+من الصورة:
+1. ADMIN_PASSWORD - موجود
+2. ADMIN_USERNAME - موجود
+3. BUILT_IN_FORGE_API_KEY - موجود
+4. BUILT_IN_FORGE_API_URL - موجود
+5. DATABASE_URL - موجود
+6. DATABASE_URL_NEW - موجود (يجب التحقق من قيمته)
+7. JWT_SECRET - موجود
+8. NODE_ENV - موجود
+9. OAUTH_SERVER_URL - موجود
+10. OPENAI_API_KEY - يجب التحقق (قد يكون موجود)
+
+المطلوب:
+1. التحقق من DATABASE_URL_NEW يشير إلى Neon الصحيح
+2. التحقق من OPENAI_API_KEY موجود
+3. إزالة DATABASE_URL القديم إذا كان يشير لقاعدة بيانات أخرى غير Neon
+
+Neon Connection String الصحيح:
+postgresql://neondb_owner:npg_DYNM8KOc0GSx@ep-cold-cherry-a48pbm2f-pooler.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+
+
+تحديث - Environment Variables الموجودة على Render (من الصور):
+
+✅ موجود:
+1. ADMIN_PASSWORD
+2. ADMIN_USERNAME
+3. BUILT_IN_FORGE_API_KEY
+4. BUILT_IN_FORGE_API_URL
+5. DATABASE_URL (قد يكون قديم - يجب فحصه)
+6. DATABASE_URL_NEW (يجب فحص قيمته)
+7. JWT_SECRET
+8. NODE_ENV
+9. OAUTH_SERVER_URL
+10. OPENAI_API_KEY ✅ (موجود!)
+11. OWNER_NAME
+12. OWNER_OPEN_ID
+13. PORT
+
+الخطة:
+1. فحص DATABASE_URL_NEW - هل يشير إلى Neon الصحيح؟
+2. إذا DATABASE_URL يشير لقاعدة أخرى غير Neon - نحذفه أو نغير قيمته
+3. Manual Deploy بعد التأكد من الإعدادات
+4. اختبار التسجيل على production

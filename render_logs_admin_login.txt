@@ -1,0 +1,32 @@
+# Render Logs - Admin Login Attempt
+
+## آخر logs من Render (Dec 2, 2025):
+
+### التسجيل المبكر (07:23:22 PM):
+```
+[EarlyAccess] Creating user: {
+  fullName: 'محمد علي الشهري',
+  email: 'mohammed.test@example.com',
+  username: 'mohammed_test'
+}
+[EarlyAccess] ✅ User created successfully: { id: 1, username: 'mohammed_test', referralCode: 'MOHAIJXB' }
+```
+
+### Auth logs:
+```
+Dec 2 07:07:11 PM  [Auth] Missing session cookie
+Dec 2 07:20:04 PM  [Auth] Missing session cookie
+Dec 2 07:24:04 PM  [Auth] Missing session cookie
+Dec 2 07:37:04 PM  [Auth] Missing session cookie
+```
+
+## ملاحظات:
+- ✅ التسجيل المبكر يعمل بنجاح
+- ✅ البيانات تُحفظ في Neon بنجاح
+- ❌ **لا توجد logs لمحاولة admin login الأخيرة** (حوالي 07:40 PM)
+- هذا يعني أن محاولة تسجيل الدخول لم تصل إلى الـ backend
+
+## الخطوة التالية:
+- فحص الكود المحلي لـ AdminLogin.tsx
+- التأكد من أن admin.login endpoint يعمل بشكل صحيح
+- اختبار تسجيل الدخول مرة أخرى مع فحص console errors في المتصفح

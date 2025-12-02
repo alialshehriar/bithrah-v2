@@ -1,0 +1,25 @@
+# DNS Management لـ bithrahapp.com على dnet.sa
+
+## المشكلة الرئيسية
+**Caution:**
+"The control DNS is unavailable because you are using the nameserver outside dnet"
+
+## السبب
+الدومين يستخدم Cloudflare nameservers:
+- Primary Server: fred.ns.cloudflare.com
+- Secondary Server: ophelia.ns.cloudflare.com
+
+## الحل
+لا يمكن تعديل DNS records من dnet.sa لأن الـ nameservers تشير إلى Cloudflare.
+
+**خياران:**
+1. **تغيير nameservers** من Cloudflare إلى dnet (سيفقد إعدادات Cloudflare الحالية)
+2. **تعديل DNS records على Cloudflare** مباشرة (الحل الأفضل)
+
+## ما يجب فعله
+يجب الدخول إلى **Cloudflare Dashboard** وتعديل DNS records هناك لتشير إلى Render:
+- إضافة A record لـ bithrahapp.com يشير إلى 216.24.57.1
+- أو إضافة CNAME record يشير إلى bithrah-v2.onrender.com
+
+## الحل البديل
+استخدام www.bithrahapp.com (verified) أو bithrah-v2.onrender.com للاختبار حالياً

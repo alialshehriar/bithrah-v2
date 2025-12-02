@@ -1,0 +1,31 @@
+# DNS Records على Cloudflare لـ bithrahapp.com
+
+## المشكلة الرئيسية
+A record لـ bithrahapp.com يشير إلى **216.150.1.1** (خطأ!)
+يجب أن يشير إلى Render IP أو نستخدم CNAME
+
+## DNS Records الحالية
+1. **A** - bithrahapp.com → 216.150.1.1 (DNS only) - TTL: 10 min ❌ **يجب تعديله**
+2. **CNAME** - www → bithrah-v2.onrender.com (DNS only) - TTL: Auto ✅ **صحيح**
+3. MX - bithrahapp.com → inbound-smtp.us-east-1.amazonaws.com (priority 0)
+4. MX - bithrahapp.com → alt2.aspmx.l.google.com (priority 5)
+5. MX - bithrahapp.com → alt1.aspmx.l.google.com (priority 5)
+6. MX - bithrahapp.com → alt4.aspmx.l.google.com (priority 10)
+7. MX - bithrahapp.com → alt3.aspmx.l.google.com (priority 10)
+8. MX - bithrahapp.com → aspmx.l.google.com (priority 1)
+9. MX - send → feedback-smtp.us-east-1.amazonses.com (priority 10)
+10-13. NS records (nsone.net)
+14-21. TXT records (SPF, DKIM, DMARC, Google verification, Vercel verification)
+
+## Cloudflare Nameservers
+- fred.ns.cloudflare.com
+- ophelia.ns.cloudflare.com
+
+## الحل
+**خيار 1:** تعديل A record لـ bithrahapp.com ليشير إلى Render IP
+**خيار 2:** حذف A record واستخدام CNAME فقط (لكن CNAME لا يعمل على root domain)
+**خيار 3:** استخدام Cloudflare CNAME Flattening (تلقائي على Cloudflare)
+
+**الحل الأفضل:**
+حذف A record الحالي وإضافة CNAME لـ @ يشير إلى bithrah-v2.onrender.com
+(Cloudflare سيحوله تلقائياً إلى A record باستخدام CNAME Flattening)

@@ -1,0 +1,35 @@
+# ملخص التغييرات على DNS - bithrahapp.com
+
+## التاريخ والوقت
+- التاريخ: 2025-01-02
+- الوقت: حوالي 07:05 PM (بتوقيت السعودية)
+
+## التغييرات التي تمت
+
+### 1. A Record لـ bithrahapp.com
+- **قبل**: 216.150.1.1 (IP خاطئ - كان يشير إلى Vercel أو خدمة أخرى)
+- **بعد**: 216.24.57.251 (Render IP الصحيح لـ bithrah-v2.onrender.com)
+- **TTL**: 10 minutes
+- **Proxy status**: DNS only
+
+### 2. CNAME Record لـ www.bithrahapp.com
+- **القيمة**: bithrah-v2.onrender.com (لم يتغير - كان صحيحاً من البداية)
+- **TTL**: Auto
+- **Proxy status**: DNS only
+
+## النتيجة
+- الآن bithrahapp.com و www.bithrahapp.com كلاهما يشيران إلى Render server بشكل صحيح
+- DNS propagation قد يستغرق 5-10 دقائق
+
+## الخطوات التالية
+1. انتظار DNS propagation (5-10 دقائق)
+2. اختبار التسجيل على https://bithrahapp.com
+3. التحقق من حفظ البيانات في Neon database
+4. اختبار نظام الإحالات
+5. تأمين لوحة الإدارة
+
+## ملاحظات
+- Cloudflare nameservers: fred.ns.cloudflare.com, ophelia.ns.cloudflare.com
+- DNS Setup: Full (Cloudflare manages all DNS records)
+- Render service: bithrah-v2 (srv-d4mlr1ggjchc73bcvggg)
+- Render URL: https://bithrah-v2.onrender.com

@@ -1,0 +1,41 @@
+# معلومات Render Settings لـ bithrah-v2
+
+## Service Info
+- Service ID: srv-d4mlr1ggjchc73bcvggg
+- Repository: alialshehriar/bithrah-v2
+- Branch: main
+- Region: Oregon (US West)
+- Instance Type: Starter (0.5 CPU, 512 MB)
+- Internal Address: bithrah-v2:3000 HTTP
+
+## Custom Domains
+1. **bithrahapp.com**
+   - Status: DNS update needed to verify domain ownership
+   - Action: Verify
+   - Instructions: Add an ANAME or ALIAS record pointing to bithrah-v2.onrender.com
+   - Alternative: Use an A record pointing to 216.24.57.1
+   - Redirects to: www.bithrahapp.com
+
+2. **www.bithrahapp.com**
+   - Status: Domain Verified ✅
+   - Action: Delete
+
+## Render Subdomain
+- Enabled
+- URL: https://bithrah-v2.onrender.com
+
+## المشكلة الحالية
+عند فتح https://bithrahapp.com/api/trpc:
+- النتيجة: 404: NOT_FOUND
+- ID: dxb1::8fvxt-1764691515908-8940f8dc0034
+- هذا يعني أن الطلب يذهب إلى Vercel وليس إلى Render!
+
+## السبب
+- الـ DNS records لـ bithrahapp.com لا تشير إلى Render بشكل صحيح
+- bithrahapp.com يحتاج إلى "Verify" (DNS update needed)
+- فقط www.bithrahapp.com verified
+
+## الحل المقترح
+1. استخدام www.bithrahapp.com (verified) بدلاً من bithrahapp.com
+2. أو تحديث DNS records لـ bithrahapp.com للإشارة إلى Render
+3. أو اختبار على https://bithrah-v2.onrender.com مباشرة
