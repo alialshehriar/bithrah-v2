@@ -74,7 +74,6 @@ export const ideasRouter = router({
             type: "json_schema",
             json_schema: {
               name: "idea_evaluation",
-              strict: true,
               schema: EVALUATION_SCHEMA,
             },
           },
@@ -152,7 +151,6 @@ export const ideasRouter = router({
             type: "json_schema",
             json_schema: {
               name: "idea_evaluation",
-              strict: true,
               schema: EVALUATION_SCHEMA,
             },
           },
