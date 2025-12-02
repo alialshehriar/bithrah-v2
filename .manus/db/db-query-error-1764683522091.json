@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, username, email, referredBy, referralCode FROM early_access_users WHERE username IN ('ahmed_test_999', 'mohammed_ref_test') ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute SELECT id, username, email, referredBy, referralCode FROM early_access_users WHERE username IN ('ahmed_test_999', 'mohammed_ref_test') ORDER BY id",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'referredby' in 'field list'"
+  ]
+}
