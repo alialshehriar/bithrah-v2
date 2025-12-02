@@ -72,7 +72,7 @@ export const earlyAccessRouter = router({
           email: input.email,
           phone: input.phone,
           username: input.username,
-          source: input.source,
+          source: input.source || null, // إرسال null إذا لم يتم تحديد source
           referralCode,
           referredBy: input.referralCode || null,
           referralCount: 0,

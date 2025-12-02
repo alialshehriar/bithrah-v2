@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE early_access_users ALTER COLUMN source DROP NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3GBEQsMxKetHhYw.15ec670fd271 --database VRAozaC7wZxCFU6SoJ8XBX --execute ALTER TABLE early_access_users ALTER COLUMN source DROP NOT NULL;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 59 near \"NOT NULL\""
+  ]
+}

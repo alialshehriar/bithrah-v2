@@ -816,7 +816,7 @@ export const earlyAccessUsers = pgTable(
     email: text("email").notNull().unique(),
     phone: text("phone"),
     username: text("username").notNull().unique(),
-    source: text("source").notNull(), // من أين عرف عن بذره
+    source: text("source"), // من أين عرف عن بذره (اختياري)
     referralCode: text("referral_code").notNull().unique(), // كود الإحالة الخاص به
     referredBy: text("referred_by"), // كود الإحالة الذي استخدمه للتسجيل
     referralCount: integer("referral_count").default(0).notNull(), // عدد الإحالات الناجحة
