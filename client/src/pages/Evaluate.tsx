@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sparkles, Loader2, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,20 +34,23 @@ export default function Evaluate() {
 
   const evaluateMut = trpc.ideas.quickEvaluate.useMutation({
     onSuccess: (data) => {
+      console.log("Evaluation success:", data);
       setEvaluationResult(data);
       setShowDialog(true);
+      toast.success("تم تقييم فكرتك بنجاح! 🎉");
     },
     onError: (error) => {
       console.error("Evaluation error:", error);
-      alert("حدث خطأ أثناء تقييم الفكرة. يرجى المحاولة مرة أخرى.");
+      toast.error("حدث خطأ أثناء تقييم الفكرة. يرجى المحاولة مرة أخرى.");
     },
   });
 
   const handleEvaluate = () => {
     if (!ideaText.trim()) {
-      alert("يرجى كتابة وصف الفكرة");
+      toast.error("يرجى كتابة وصف الفكرة");
       return;
     }
+    console.log("Starting evaluation...");
     evaluateMut.mutate({ ideaName: "فكرة جديدة", ideaDescription: ideaText });
   };
 
