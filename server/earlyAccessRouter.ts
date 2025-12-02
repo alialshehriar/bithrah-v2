@@ -21,7 +21,7 @@ export const earlyAccessRouter = router({
         email: z.string().email("البريد الإلكتروني غير صحيح"),
         phone: z.string().optional(),
         username: z.string().min(3, "اسم المستخدم يجب أن يكون 3 أحرف على الأقل"),
-        source: z.string().min(1, "يرجى تحديد كيف عرفت عن بذره"),
+        source: z.string().optional(), // اختياري: كيف عرفت عن بذره
         referralCode: z.string().optional(), // كود الإحالة المستخدم
       })
     )
