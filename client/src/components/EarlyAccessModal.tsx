@@ -62,6 +62,15 @@ export function EarlyAccessModal({ isOpen }: EarlyAccessModalProps) {
     return () => clearInterval(interval);
   }, []);
 
+  // Read ref parameter from URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setFormData(prev => ({ ...prev, referralCode: refCode }));
+    }
+  }, []);
+
   // Prevent body scroll
   useEffect(() => {
     if (isOpen) {
