@@ -54,30 +54,8 @@ export default function Evaluate() {
     evaluateMut.mutate({ ideaName: "فكرة جديدة", ideaDescription: ideaText });
   };
 
-  // Prepare data for charts
-  const getChartData = () => {
-    if (!evaluationResult?.scores) return null;
-
-    const radarData = [
-      { subject: "الجدوى الفنية", value: evaluationResult.scores.feasibility || 0, fullMark: 100 },
-      { subject: "السوق", value: evaluationResult.scores.market || 0, fullMark: 100 },
-      { subject: "المالية", value: evaluationResult.scores.financial || 0, fullMark: 100 },
-      { subject: "التنفيذ", value: evaluationResult.scores.execution || 0, fullMark: 100 },
-      { subject: "النمو", value: evaluationResult.scores.growth || 0, fullMark: 100 },
-    ];
-
-    const barData = [
-      { name: "الجدوى الفنية", score: evaluationResult.scores.feasibility || 0, color: "#3b82f6" },
-      { name: "السوق", score: evaluationResult.scores.market || 0, color: "#10b981" },
-      { name: "المالية", score: evaluationResult.scores.financial || 0, color: "#f59e0b" },
-      { name: "التنفيذ", score: evaluationResult.scores.execution || 0, color: "#8b5cf6" },
-      { name: "النمو", score: evaluationResult.scores.growth || 0, color: "#ec4899" },
-    ];
-
-    return { radarData, barData };
-  };
-
-  const chartData = getChartData();
+  // quickEvaluate returns simple structure without detailed scores
+  // Just show overall score and insights
 
   // Get score color based on value
   const getScoreColor = (score: number) => {
@@ -174,89 +152,24 @@ export default function Evaluate() {
             </DialogTitle>
           </DialogHeader>
 
-          {evaluationResult && chartData && (
+          {evaluationResult && (
             <div className="space-y-8">
               {/* Overall Score - Large Display */}
               <div className="text-center space-y-4 p-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                <div className={`text-8xl font-bold ${getScoreColor(evaluationResult.scores?.overall || 0)}`}>
-                  {evaluationResult.scores?.overall || 0}
+                <div className={`text-8xl font-bold ${getScoreColor(evaluationResult.overallScore || 0)}`}>
+                  {evaluationResult.overallScore || 0}
                 </div>
                 <p className="text-xl text-muted-foreground font-semibold">من 100</p>
-                <Progress value={evaluationResult.scores?.overall || 0} className="h-4 max-w-md mx-auto" />
+                <Progress value={evaluationResult.overallScore || 0} className="h-4 max-w-md mx-auto" />
                 <p className="text-lg font-medium text-muted-foreground">
-                  {evaluationResult.scores?.overall >= 80 && "🎉 فكرة ممتازة! جاهزة للتنفيذ"}
-                  {evaluationResult.scores?.overall >= 60 && evaluationResult.scores?.overall < 80 && "👍 فكرة جيدة مع بعض التحسينات"}
-                  {evaluationResult.scores?.overall >= 40 && evaluationResult.scores?.overall < 60 && "⚠️ فكرة واعدة لكن تحتاج تطوير"}
-                  {evaluationResult.scores?.overall < 40 && "💡 فكرة تحتاج إعادة تقييم وتحسين كبير"}
+                  {evaluationResult.overallScore >= 80 && "🎉 فكرة ممتازة! جاهزة للتنفيذ"}
+                  {evaluationResult.overallScore >= 60 && evaluationResult.overallScore < 80 && "👍 فكرة جيدة مع بعض التحسينات"}
+                  {evaluationResult.overallScore >= 40 && evaluationResult.overallScore < 60 && "⚠️ فكرة واعدة لكن تحتاج تطوير"}
+                  {evaluationResult.overallScore < 40 && "💡 فكرة تحتاج إعادة تقييم وتحسين كبير"}
                 </p>
               </div>
 
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Radar Chart */}
-                <Card className="p-6">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-center">التحليل الشامل</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RadarChart data={chartData.radarData}>
-                        <PolarGrid />
-                        <PolarAngleAxis dataKey="subject" />
-                        <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                        <Radar
-                          name="الدرجة"
-                          dataKey="value"
-                          stroke="#8b5cf6"
-                          fill="#8b5cf6"
-                          fillOpacity={0.6}
-                        />
-                      </RadarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
 
-                {/* Bar Chart */}
-                <Card className="p-6">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-center">الدرجات التفصيلية</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={chartData.barData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" domain={[0, 100]} />
-                        <YAxis dataKey="name" type="category" width={100} />
-                        <Tooltip />
-                        <Bar dataKey="score" radius={[0, 8, 8, 0]}>
-                          {chartData.barData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Score Cards Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {[
-                  { name: "الجدوى الفنية", score: evaluationResult.scores?.feasibility || 0, icon: "🔧" },
-                  { name: "السوق", score: evaluationResult.scores?.market || 0, icon: "📊" },
-                  { name: "المالية", score: evaluationResult.scores?.financial || 0, icon: "💰" },
-                  { name: "التنفيذ", score: evaluationResult.scores?.execution || 0, icon: "⚙️" },
-                  { name: "النمو", score: evaluationResult.scores?.growth || 0, icon: "📈" },
-                ].map((item, idx) => (
-                  <Card key={idx} className={`${getScoreBgColor(item.score)} border-2`}>
-                    <CardContent className="pt-6 text-center">
-                      <div className="text-3xl mb-2">{item.icon}</div>
-                      <div className={`text-3xl font-bold ${getScoreColor(item.score)}`}>{item.score}</div>
-                      <p className="text-xs font-medium mt-2 text-muted-foreground">{item.name}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
 
               {/* Key Insights Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
